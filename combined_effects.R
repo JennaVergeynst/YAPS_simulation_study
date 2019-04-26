@@ -55,11 +55,12 @@ for (i in sequence(length(mean_bi))){
       sim_list <- simulation(trueTrack, pingType, sbi_mean=sbi_mean, sbi_sd=sbi_sd, rbi_min=rbi_min, rbi_max=rbi_max, pNA=0.3, pMP=0.03, shift=shift)
       toa_rev_df <- sim_list[[1]]
       teleTrack <- sim_list[[2]]
-      estimated_pos <- sim_list[[3]]
-      real_error <- sim_list[[4]]
-      estimated_error <- sim_list[[5]]
-      hydros <- sim_list[[6]]
+      hydros <- sim_list[[3]]
   
+      est_list <- estimation(pingType, hydros, toa_rev_df, rbi_min=rbi_min, rbi_max=rbi_max)
+      estimated_pos <- est_list[[1]]
+      real_error <- est_list[[2]]
+      estimated_error <- est_list[[3]]
       ## plot the resulting estimated track
       # plot(y~x, data=trueTrack, type="l", xlim=(c(min(c(hydros$hx, trueTrack$x)), max(c(hydros$hx, trueTrack$x)))), ylim=(c(min(c(hydros$hy, trueTrack$y)), max(c(hydros$hy, trueTrack$y)))), asp=1)
       # points(hy~hx, data=hydros, col="green", pch=20, cex=3)

@@ -64,16 +64,29 @@ simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, 
   toa_rev_df$ss <- teleTrack$ss
   
   
+  # return all info for use by Vemco
+  res_list <- list(toa_rev_df, teleTrack, hydros)
+  
+  return(res_list)
+}
+
+
+
+estimation <- function(pingType, hydros, toa_rev_df, rbi_min=NA, rbi_max=NA){
+  
+  toa_rev_df$ss <- NULL
+  toa <- t(data.matrix(toa_rev_df))
+  
   if(pingType == 'sbi'){
     inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1)
   } else if(pingType == 'rbi'){
     inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1, rbi_min=rbi_min, rbi_max=rbi_max)
   }
-
+  
   pl <- c()
   maxIter <- ifelse(pingType=="sbi", 500, 5000)
   outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
-
+  
   # Estimates in pl
   pl <- outTmb$pl
   estimated_pos <- as.data.frame(pl$X)
@@ -93,7 +106,6 @@ simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, 
   estimated_error <- sqrt(plsd$X**2+plsd$Y**2)
   
   # return all info for use by Vemco
-  res_list <- list(toa_rev_df, teleTrack, estimated_pos, real_error, estimated_error, hydros)
+  res_list <- list(estimated_pos, real_error, estimated_error)
   
-  return(res_list)
 }
