@@ -9,9 +9,9 @@ source("wrapper_functions.R")
 
 nb_repetitions <- 200 # nb of different simulated tracks for each setting
 
-mean_bi = c(1.2, 5, 10, 15, 20, 25)
-min_bi = c(1.1, 1, 5, 9, 13, 17)
-max_bi = c(1.3, 9, 15, 21, 27, 33)
+mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
+min_bi = c(1.1, 1, 9, 17, 45, 60)
+max_bi = c(1.3, 9, 21, 33, 90, 120)
 
 # # uncomment if varying shifts
 # shifts = c(0, 1/3, 1/2, 2/3, 1) # shift of hydros versus x- and y-extend of the track 
@@ -28,7 +28,7 @@ summary <- data.frame(matrix(ncol = 6, nrow = length(mean_bi)*length(to_vary)*nb
 colnames(summary) <- c("rep", "n", "pingType", "mean_bi", "shift", "mean")
 index <- 1
 
-for (i in sequence(6)){
+for (i in sequence(length(mean_bi))){
   for (j in as.list(to_vary)){
     for (r in sequence(nb_repetitions)){
       try({
