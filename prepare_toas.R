@@ -1,0 +1,59 @@
+rm(list=ls())
+graphics.off()
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
+PATH = getwd()
+library(yaps)
+#set.seed(42)
+
+source("wrapper_functions.R")
+
+hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
+nb_repetitions <- 200 # nb of different simulated tracks for each setting
+
+mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
+min_bi = c(1.1, 1, 9, 17, 45, 60)
+max_bi = c(1.3, 9, 21, 33, 90, 120)
+
+dist_to_array = c(NA, 0, 250, 500) # -NA means no shift
+
+
+for (r in sequence(nb_repetitions)){
+  # Read in simulated true track
+  trueTrack <- read.csv(paste(PATH,'/results/trueTracks/trueTrack_',toString(r),'.csv',sep = ''), row.names = 1)
+
+  for (dist in as.list(dist_to_array)){
+    if (!is.na(dist)){
+      trueTrack <- shift_trueTrack(trueTrack, dist_to_array=dist)
+      # plot(hydros, xlim = c(-250, 1000))
+      # lines(trueTrack$x, trueTrack$y, col='red')
+      # lines(shifted_trueTrack$x, shifted_trueTrack$y, col='blue')
+    }
+
+    for (i in sequence(length(mean_bi))){
+      try({
+        # for random burst interval
+        pingType <- 'rbi'
+        rbi_min <- min_bi[i]
+        rbi_max <- max_bi[i]
+        sbi_mean=NA
+        sbi_sd=NA
+        
+        # for stable burst interval
+        # pingType <- 'sbi'
+        # sbi_mean <- mean_bi[i]
+        # sbi_sd <- 1e-4
+        # rbi_min <- NA
+        # rbi_max <- NA
+        
+        toa_rev_df <- simulation(trueTrack, hydros, pingType, sbi_mean=sbi_mean, sbi_sd=sbi_sd, rbi_min=rbi_min, rbi_max=rbi_max, pNA=0.3, pMP=0.03)
+
+        ## nametag for datafiles to write out
+        nametag = paste0(pingType, toString(mean_bi[i]), '_dist', toString(dist), '_rep', toString(r))
+        
+        write.csv(toa_rev_df,paste(PATH,'/results/toa_dfs/toa_df_',nametag,'.csv',sep = ''))
+
+
+      })
+    }
+  }
+}
