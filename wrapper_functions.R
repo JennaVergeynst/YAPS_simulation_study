@@ -86,7 +86,16 @@ shift_hydros <- function(hydros, trueTrack, shift=1/2){
   return(hydros_shifted)
 }
 
-simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, rbi_max=NA, pNA=0.25, pMP=0.01, shift=0, sigmaToa=1e-4){
+shift_trueTrack <- function(trueTrack, dist_to_array=0){
+  min.x <- min(trueTrack$x)
+  shift <- 250+dist_to_array-min.x
+  trueTrack_shifted <- trueTrack
+  trueTrack_shifted$x <- trueTrack$x + shift
+  
+  return(trueTrack_shifted)
+}
+
+simulation <- function(trueTrack, hydros, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, rbi_max=NA, pNA=0.25, pMP=0.01, sigmaToa=1e-4){
   # shift == FALSE or float
   # Simulate telemetry observations from true track.
   # Format and parameters depend on type of transmitter burst interval (BI) - stable (sbi) or random (rbi).
@@ -99,11 +108,7 @@ simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, 
     pingType <- pingType; rbi_min <- rbi_min; rbi_max <- rbi_max;
     teleTrack <- simTelemetryTrack(trueTrack, ss='rw', pingType=pingType, rbi_min=rbi_min, rbi_max=rbi_max)
   }
-  
-  # Simulate hydrophone array
-  hydros <- simHydros_adapted(trueTrack=trueTrack)
-  hydros <- shift_hydros(hydros, trueTrack, shift=shift)
-  
+
   # Convert TelemetryTrack in toa-matrix that can be fed to YAPS
   toa_list <- simToa(teleTrack, hydros, pingType, sigmaToa=sigmaToa, pNA=pNA, pMP=pMP)
   toa <- toa_list$toa
@@ -112,11 +117,7 @@ simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, 
   rownames(hydros) = colnames(toa_rev_df) # only add column names of receivers => therefore run this before adding soundspeed
   toa_rev_df$ss <- teleTrack$ss
   
-  
-  # return all info for use by Vemco
-  res_list <- list(toa_rev_df, teleTrack, hydros)
-  
-  return(res_list)
+  return(toa_rev_df)
 }
 
 
