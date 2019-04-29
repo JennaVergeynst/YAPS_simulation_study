@@ -1,3 +1,52 @@
+## Temporarily add this function until original YAPS is adapted
+simTrueTrack <- function(model='rw', n, deltaTime=1, D=NULL, shape=NULL, scale=NULL, addDielPattern=TRUE, start_pos=NULL){
+  try(if(model=='rw'  & is.null(D)) stop("When model == 'rw', D needs to be specified"))
+  try(if(model=='crw' & (is.null(shape) | is.null(scale))) stop("When model == 'crw', shape and scale needs to be specified"))
+  
+  #times
+  dt <- rep(deltaTime, n-1)
+  time <- cumsum(c(0, dt))
+  
+  #start position
+  if(!is.null(start_pos)){
+    x0 <- start_pos[1]
+    y0 <- start_pos[2]
+  }	else{
+    x0 <- stats::runif(1,0,5)
+    y0 <- stats::runif(1,0,5)
+  }
+  
+  #RW-model
+  if(model == 'rw'){
+    x <- cumsum(c(x0, stats::rnorm(n-1, 0, sd=sqrt(2*D*dt))))
+    y <- cumsum(c(y0, stats::rnorm(n-1, 0, sd=sqrt(2*D*dt))))
+  } else if (model == 'crw'){
+    # make weibull distributed steps
+    steps <- stats::rweibull(n-1, shape, scale)
+    if(addDielPattern){
+      # # # # make diel pattern - first 1/4 very little movement, middle half normal-high movement, last 1/4 very little movement
+      steps[1:floor(n/8)] <- steps[1:floor(n/8)]/50
+      steps[(3*floor(n/8)):(4*floor(n/8))] <- steps[(3*floor(n/8)):(4*floor(n/8))]/50
+      steps[(5*floor(n/8)):(6*floor(n/8))] <- steps[(5*floor(n/8)):(6*floor(n/8))]/50
+      steps[(7*floor(n/8)):n-1] <- steps[(7*floor(n/8)):n-1]/50
+    }
+    
+    # make clustered turning angles
+    theta <- circular::rwrappedcauchy(n-1, mu=circular::circular(0), rho=.99)
+    # cumulative angle (absolute orientation)
+    Phi <- cumsum(theta)
+    # step length components
+    dX <- c(x0, steps*cos(Phi))
+    dY <- c(y0, steps*sin(Phi))
+    # actual X-Y values
+    x<-cumsum(dX)
+    y<-cumsum(dY)
+  }
+  return(data.frame(time=time, x=x, y=y))
+}
+
+
+
 simHydros_adapted <- function(trueTrack){
   hx.min <- min(trueTrack$x) - 25
   hx.max <- max(trueTrack$x) + 25
@@ -55,9 +104,9 @@ simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, 
   hydros <- simHydros_adapted(trueTrack=trueTrack)
   hydros <- shift_hydros(hydros, trueTrack, shift=shift)
   
+  # Convert TelemetryTrack in toa-matrix that can be fed to YAPS
   toa_list <- simToa(teleTrack, hydros, pingType, sigmaToa=sigmaToa, pNA=pNA, pMP=pMP)
   toa <- toa_list$toa
-  
   toa_rev <- t(toa)
   toa_rev_df <- as.data.frame(toa_rev)
   rownames(hydros) = colnames(toa_rev_df) # only add column names of receivers => therefore run this before adding soundspeed
