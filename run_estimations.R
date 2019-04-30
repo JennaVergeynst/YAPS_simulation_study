@@ -12,19 +12,20 @@ all_toas <- list.files(toa_path)
 hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
 
 summary <- data.frame(matrix(ncol = 6, nrow = length(all_toas)))
-colnames(summary) <- c("rep", "n", "pingType", "mean_bi", "shift", "mean")
+colnames(summary) <- c("rep", "n", "pingType", "mean_bi", "dist", "mean")
 index <- 1
 
 for (filename in as.list(all_toas)){
   toa_rev_df <- read.csv(paste0(toa_path,filename), skip = 7)
-  metadata <- read.csv(paste0(toa_path,filename), nrows = 6, sep='\t', header = FALSE, row.names = 1, stringsAsFactors = FALSE)
+  metadata <- read.csv(paste0(toa_path,filename), nrows = 7, sep='\t', header = FALSE, row.names = 1, stringsAsFactors = FALSE)
   pingType = metadata["pingType",]
   rbi_min = as.double(metadata["rbi_min",])
   rbi_max = as.double(metadata["rbi_max",])
   csvtag = substring(filename, 8)
   
   # take only first 10.000 observations of toa_rev_df
-  toa_rev_df <- toa_rev_df[1:10000,]
+  n <- 10000
+  toa_rev_df <- toa_rev_df[1:n,]
 
   try({
     est_list <- estimation(pingType, hydros, toa_rev_df, rbi_min=rbi_min, rbi_max=rbi_max)
@@ -42,11 +43,11 @@ for (filename in as.list(all_toas)){
     # write.csv(estimated_pos,paste(PATH,'/results/yapsTrack_',nametag,'.csv',sep = ''))
     
     # Write out mean, 5%, 95% percentile, and extra information (n, pingtype, mean_bi, shift, rep) in dataframe
-    summary[index,"rep"] <- r
+    summary[index,"rep"] <- metadata["rep",]
     summary[index,"n"] <- n
     summary[index,"pingType"] <- pingType
-    summary[index,"mean_bi"] <- mean_bi[i]
-    summary[index,"shift"] <- round(j,1)
+    summary[index,"mean_bi"] <- (rbi_min+rbi_max)/2
+    summary[index,"dist"] <- as.integer(metadata["dist",])
     summary[index,"mean"] <- mean(real_error)
   
     index <- index+1
