@@ -8,6 +8,12 @@ For all tracks:
 - correlated random walk, shape=1, scale=0.5
 - DielPattern added
 
+## Effect of ping type
+We compare following ping types:
+- stable burst interval (sbi)
+- random burst interval (rbi)
+- pseudo random burst interval (pseudo-rbi)
+
 ## Effect of track length
 Simulate 200 tracks of 10,000 positions.
 
