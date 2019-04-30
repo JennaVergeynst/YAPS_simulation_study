@@ -5,6 +5,7 @@ PATH = getwd()
 library(yaps)
 #set.seed(42)
 
+
 source("wrapper_functions.R")
 
 hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
@@ -16,6 +17,9 @@ max_bi = c(1.3, 9, 21, 33, 90, 120)
 
 dist_to_array = c(NA, 0, 250, 500) # -NA means no shift
 
+# r <- 1
+# dist <- NA
+# i <- 1
 
 for (r in sequence(nb_repetitions)){
   # Read in simulated true track
@@ -50,10 +54,16 @@ for (r in sequence(nb_repetitions)){
         ## nametag for datafiles to write out
         nametag = paste0(pingType, toString(mean_bi[i]), '_dist', toString(dist), '_rep', toString(r))
         
-        write.csv(toa_rev_df,paste(PATH,'/results/toa_dfs/toa_df_',nametag,'.csv',sep = ''))
+        file = paste(PATH,'/results/toa_dfs/toa_df_',nametag,'.csv',sep = '')
+        cat(paste0("pingType\t", pingType, "\nrbi_min\t", rbi_min, "\nrbi_max\t", rbi_max, 
+                   "\nsbi_mean\t", sbi_mean, "\nsbi_sd\t", sbi_sd, 
+                   "\ndist\t", dist, "\nrep\t", r, "\n"), file=file)
+        write.table(toa_rev_df, file,sep=",",append=TRUE, row.names = FALSE)
+        #write.csv(toa_rev_df,paste(PATH,'/results/toa_dfs/toa_df_',nametag,'.csv',sep = ''))
 
 
       })
     }
   }
 }
+
