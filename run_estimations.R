@@ -1,24 +1,31 @@
 rm(list=ls())
 graphics.off()
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
-PATH = getwd()
+PATH <- getwd()
+toa_path <- paste0(PATH, '/results/toa_dfs/')
 library(yaps)
 #set.seed(42)
 
 source("wrapper_functions.R")
 
-all_toas <- list.files(paste0(PATH, '/results/toa_dfs/'))
+all_toas <- list.files(toa_path)
+hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
 
-summary <- data.frame(matrix(ncol = 6, nrow = length(mean_bi)*length(to_vary)*nb_repetitions))
+summary <- data.frame(matrix(ncol = 6, nrow = length(all_toas)))
 colnames(summary) <- c("rep", "n", "pingType", "mean_bi", "shift", "mean")
 index <- 1
 
 for (filename in as.list(all_toas)){
-  toa_rev_df <- read.csv(filename, row.names = 1)
+  toa_rev_df <- read.csv(paste0(toa_path,filename), skip = 7)
+  metadata <- read.csv(paste0(toa_path,filename), nrows = 6, sep='\t', header = FALSE, row.names = 1, stringsAsFactors = FALSE)
+  pingType = metadata["pingType",]
+  rbi_min = as.double(metadata["rbi_min",])
+  rbi_max = as.double(metadata["rbi_max",])
   csvtag = substring(filename, 8)
-  # take only first 10.000 observations of toa_rev_df
-  # read in metadata, containing pingtype, rbi_min, rbi_max, sbi_mean, ... ???
   
+  # take only first 10.000 observations of toa_rev_df
+  toa_rev_df <- toa_rev_df[1:10000,]
+
   try({
     est_list <- estimation(pingType, hydros, toa_rev_df, rbi_min=rbi_min, rbi_max=rbi_max)
     estimated_pos <- est_list[[1]]
