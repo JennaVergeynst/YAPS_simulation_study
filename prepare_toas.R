@@ -15,7 +15,7 @@ mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
 min_bi = c(1.1, 1, 9, 17, 45, 60)
 max_bi = c(1.3, 9, 21, 33, 90, 120)
 
-dist_to_array = c(NA, 0, 250, 500) # -NA means no shift
+dist_to_array = c(NA, 0, 100, 200) # -NA means no shift
 
 # r <- 1
 # dist <- NA
