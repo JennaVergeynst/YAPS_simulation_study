@@ -1,56 +1,54 @@
 # SIMULATION STUDY
 
-200 simulated tracks, 5 repetitions for each setting => 1000 estimations for each point to calculate mean and percentiles
+200 simulated tracks of length 100,000
+- correlated random walk, shape=1, scale=0.5
+- DielPattern added
 
 For all tracks: 
 - p(NA) = 0.3 (results in about 80% position yield according to yaps paper fig 1)
-- p(MP) = 0.03 (aspect quite high multipath in both case studies)
-- correlated random walk, shape=1, scale=0.5
-- DielPattern added
+- p(MP) = 0.03 (aspect quite high multipath in all case studies)
+
 
 ## Effect of ping type
 We compare following ping types:
 - stable burst interval (sbi)
 - random burst interval (rbi)
-- pseudo random burst interval (pseudo-rbi)
+- pseudo random burst interval (pseudo-rbi) (i.e. with known sequence of burst intervals)
 
-## Effect of track length
-Simulate 200 tracks of 10,000 positions.
+## Effect of chunk size
+Test different chunk sizes for running YAPS in parallel. This is kind of a "parameter optimisation" => we keep the best chunk size for the other runs. **Only relevant for YAPS.**
 
-Test track lengths: 250, 500, 1000, 5000, 10000   
-Keep shift (0) constant
+Test chunk sizes: 250, 500, 1000, 5000, 10000 (i.e. length of the telemetry track. For the longest burst interval, the largest chunk size possible will be around 1000)
 
 For each track (of 200):
-- 5 track lengths X 6 sbi’s X 5 repetitions (=150)
-- 5 track lengths X 6 rbi’s X 5 repetitions (=150)
-- => 60,000 runs or estimations
+- 1 pingType: rbi (this is the hardest to run, so the optimal parameter found here should work for the other pingTypes)
+- 6 burst interval lengths
+- 5 chunk sizes
+- 6x5x200 = 6,000 runs or estimations
 
 ## Effect of bi length
-Take the 250 first positions of each of the 200 tracks.
-
-Test sbi’s: 1.2, 5, 10, 15, 20, 25   
-Test rbi’s: 1.1/1.3, 1/9, 5/15, 9/21, 13/27, 17/33 (min/max bi)   
-Keep shift (0) and track length (250) constant   
-
+Test sbi’s: 1.2, 5, 15, 25, 67.5, 90  
+Test rbi’s: 1.1/1.3, 1/9, 9/21, 17/33; 45/90, 60/120  (min/max bi)   
 
 For each track (of 200):
-- 6 sbi’s X 5 repetitions (=30)
-- 6 rbi’s X 5 repetitions (=30)
-- =>12,000 runs or estimations (these are also the 12,000 estimations in “effect of track length” with track length 250)
+- 3 pingTypes
+- 6 burst interval lengths
+- => 3x6x200=3600 runs or estimations (1200 of these are already run in "Effect of chunk size")
 
-## Effect of hydrophone shift
-Take the 250 first positions of each of the 200 tracks.
-
-Test shifts: 0, 1/3, 1/2, 2/3, 1   
-Keep track length (250) constant   
+## Effect of out-of-array
+Shift the track so that it is entirely outside of the array, with different distances to the array contour
+Test distances: 0, 100, 200 (i.e. shortest distance between track and array contour)
 
 For each track (of 200):
-- 5 shifts X 6 sbi’s X 5 repetitions (=150)
-- 5 shifts X 6 rbi’s X 5 repetitions (=150)
-- => 60,000 runs or estimations (the first 12,000 estimations are the same as the ones in “effect of track length” with track length 250)
+- 3 distances
+- 3 pingTypes
+- 6 burst interval lengths
+- => 3x6x3x200 = 10800 runs or estimations
+
 
 ## TOTAL:
-- 108,000 runs for YAPS (21,600 if no repetitions)
-- 21,600 TDOA runs
-- 21,600 VPS runs (= 12 rbi and sbi’s x 5 shifts x 4 track lengths)
+
+- 6000+3600-1200+10800 = 15,900 runs for YAPS
+- 3600+10800 = 14400 TDOA runs
+- 3600+10800 = 14400 VPS runs
 
