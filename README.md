@@ -4,7 +4,7 @@
 - correlated random walk, shape=1, scale=0.5
 - DielPattern added
 
-For all tracks: 
+For all telemetry tracks: 
 - p(NA) = 0.3 (results in about 80% position yield according to yaps paper fig 1)
 - p(MP) = 0.03 (aspect quite high multipath in all case studies)
 
@@ -37,6 +37,7 @@ For each track (of 200):
 
 ## Effect of out-of-array
 Shift the track so that it is entirely outside of the array, with different distances to the array contour
+
 Test distances: 0, 100, 200 (i.e. shortest distance between track and array contour)
 
 For each track (of 200):
