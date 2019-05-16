@@ -1,3 +1,52 @@
+## Temporarily add this function until original YAPS is adapted
+simTrueTrack <- function(model='rw', n, deltaTime=1, D=NULL, shape=NULL, scale=NULL, addDielPattern=TRUE, start_pos=NULL){
+  try(if(model=='rw'  & is.null(D)) stop("When model == 'rw', D needs to be specified"))
+  try(if(model=='crw' & (is.null(shape) | is.null(scale))) stop("When model == 'crw', shape and scale needs to be specified"))
+  
+  #times
+  dt <- rep(deltaTime, n-1)
+  time <- cumsum(c(0, dt))
+  
+  #start position
+  if(!is.null(start_pos)){
+    x0 <- start_pos[1]
+    y0 <- start_pos[2]
+  }	else{
+    x0 <- stats::runif(1,0,5)
+    y0 <- stats::runif(1,0,5)
+  }
+  
+  #RW-model
+  if(model == 'rw'){
+    x <- cumsum(c(x0, stats::rnorm(n-1, 0, sd=sqrt(2*D*dt))))
+    y <- cumsum(c(y0, stats::rnorm(n-1, 0, sd=sqrt(2*D*dt))))
+  } else if (model == 'crw'){
+    # make weibull distributed steps
+    steps <- stats::rweibull(n-1, shape, scale)
+    if(addDielPattern){
+      # # # # make diel pattern - first 1/4 very little movement, middle half normal-high movement, last 1/4 very little movement
+      steps[1:floor(n/8)] <- steps[1:floor(n/8)]/50
+      steps[(3*floor(n/8)):(4*floor(n/8))] <- steps[(3*floor(n/8)):(4*floor(n/8))]/50
+      steps[(5*floor(n/8)):(6*floor(n/8))] <- steps[(5*floor(n/8)):(6*floor(n/8))]/50
+      steps[(7*floor(n/8)):n-1] <- steps[(7*floor(n/8)):n-1]/50
+    }
+    
+    # make clustered turning angles
+    theta <- circular::rwrappedcauchy(n-1, mu=circular::circular(0), rho=.99)
+    # cumulative angle (absolute orientation)
+    Phi <- cumsum(theta)
+    # step length components
+    dX <- c(x0, steps*cos(Phi))
+    dY <- c(y0, steps*sin(Phi))
+    # actual X-Y values
+    x<-cumsum(dX)
+    y<-cumsum(dY)
+  }
+  return(data.frame(time=time, x=x, y=y))
+}
+
+
+
 simHydros_adapted <- function(trueTrack){
   hx.min <- min(trueTrack$x) - 25
   hx.max <- max(trueTrack$x) + 25
@@ -37,7 +86,16 @@ shift_hydros <- function(hydros, trueTrack, shift=1/2){
   return(hydros_shifted)
 }
 
-simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, rbi_max=NA, pNA=0.25, pMP=0.01, shift=0, sigmaToa=1e-4){
+shift_trueTrack <- function(trueTrack, dist_to_array=0){
+  min.x <- min(trueTrack$x)
+  shift <- 250+dist_to_array-min.x
+  trueTrack_shifted <- trueTrack
+  trueTrack_shifted$x <- trueTrack$x + shift
+  
+  return(trueTrack_shifted)
+}
+
+simulation <- function(trueTrack, hydros, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, rbi_max=NA, pNA=0.25, pMP=0.01, sigmaToa=1e-4){
   # shift == FALSE or float
   # Simulate telemetry observations from true track.
   # Format and parameters depend on type of transmitter burst interval (BI) - stable (sbi) or random (rbi).
@@ -50,30 +108,35 @@ simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, 
     pingType <- pingType; rbi_min <- rbi_min; rbi_max <- rbi_max;
     teleTrack <- simTelemetryTrack(trueTrack, ss='rw', pingType=pingType, rbi_min=rbi_min, rbi_max=rbi_max)
   }
-  
-  # Simulate hydrophone array
-  hydros <- simHydros_adapted(trueTrack=trueTrack)
-  hydros <- shift_hydros(hydros, trueTrack, shift=shift)
-  
+
+  # Convert TelemetryTrack in toa-matrix that can be fed to YAPS
   toa_list <- simToa(teleTrack, hydros, pingType, sigmaToa=sigmaToa, pNA=pNA, pMP=pMP)
   toa <- toa_list$toa
-  
   toa_rev <- t(toa)
   toa_rev_df <- as.data.frame(toa_rev)
   rownames(hydros) = colnames(toa_rev_df) # only add column names of receivers => therefore run this before adding soundspeed
   toa_rev_df$ss <- teleTrack$ss
   
+  return(toa_rev_df)
+}
+
+
+
+estimation <- function(pingType, hydros, toa_rev_df, rbi_min=NA, rbi_max=NA){
+  
+  toa_rev_df$ss <- NULL
+  toa <- t(data.matrix(toa_rev_df))
   
   if(pingType == 'sbi'){
     inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1)
   } else if(pingType == 'rbi'){
     inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1, rbi_min=rbi_min, rbi_max=rbi_max)
   }
-
+  
   pl <- c()
   maxIter <- ifelse(pingType=="sbi", 500, 5000)
   outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
-
+  
   # Estimates in pl
   pl <- outTmb$pl
   estimated_pos <- as.data.frame(pl$X)
@@ -93,7 +156,6 @@ simulation <- function(trueTrack, pingType, sbi_mean=NA, sbi_sd=NA, rbi_min=NA, 
   estimated_error <- sqrt(plsd$X**2+plsd$Y**2)
   
   # return all info for use by Vemco
-  res_list <- list(toa_rev_df, teleTrack, estimated_pos, real_error, estimated_error, hydros)
+  res_list <- list(estimated_pos, real_error, estimated_error)
   
-  return(res_list)
 }
