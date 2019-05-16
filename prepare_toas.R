@@ -17,9 +17,6 @@ max_bi = c(1.3, 9, 21, 33, 90, 120)
 
 dist_to_array = c(NA, 0, 100, 200) # -NA means no shift
 
-# r <- 1
-# dist <- NA
-# i <- 1
 
 for (r in sequence(nb_repetitions)){
   # Read in simulated true track
@@ -27,6 +24,8 @@ for (r in sequence(nb_repetitions)){
 
   for (dist in as.list(dist_to_array)){
     if (!is.na(dist)){
+      # shift the track so that the distance from its closest point 
+      # to the array contour equals 'dist' meter
       trueTrack <- shift_trueTrack(trueTrack, dist_to_array=dist)
       # plot(hydros, xlim = c(-250, 1000))
       # lines(trueTrack$x, trueTrack$y, col='red')
@@ -48,6 +47,10 @@ for (r in sequence(nb_repetitions)){
         # sbi_sd <- 1e-4
         # rbi_min <- NA
         # rbi_max <- NA
+        
+        # for pseudo-random burst interval
+        # ...
+        
         
         toa_rev_df <- simulation(trueTrack, hydros, pingType, sbi_mean=sbi_mean, sbi_sd=sbi_sd, rbi_min=rbi_min, rbi_max=rbi_max, pNA=0.3, pMP=0.03)
 
