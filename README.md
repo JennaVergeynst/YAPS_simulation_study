@@ -18,7 +18,7 @@ We compare following ping types:
 ## Effect of chunk size
 Test different chunk sizes for running YAPS in parallel. This is kind of a "parameter optimisation" => we keep the best chunk size for the other runs. **Only relevant for YAPS.**
 
-Test chunk sizes: 250, 500, 1000, 5000, 10000 (i.e. length of the telemetry track. For the longest burst interval, the largest chunk size possible will be around 1000)
+Test chunk sizes: 250, 500, 1000, 5000, 10000 (For the longest burst interval, the largest chunk size possible will be around 1000 only)
 
 For each track (of 200):
 - 1 pingType: rbi (this is the hardest to run, so the optimal parameter found here should work for the other pingTypes)
