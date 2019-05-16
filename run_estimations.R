@@ -23,9 +23,9 @@ for (filename in as.list(all_toas)){
   rbi_max = as.double(metadata["rbi_max",])
   csvtag = substring(filename, 8)
   
-  # take only first 10.000 observations of toa_rev_df
-  n <- 10000
-  toa_rev_df <- toa_rev_df[1:n,]
+  # # take only first 10.000 observations of toa_rev_df
+  # n <- 10000
+  # toa_rev_df <- toa_rev_df[1:n,]
 
   try({
     est_list <- estimation(pingType, hydros, toa_rev_df, rbi_min=rbi_min, rbi_max=rbi_max)
@@ -33,21 +33,21 @@ for (filename in as.list(all_toas)){
     real_error <- est_list[[2]]
     estimated_error <- est_list[[3]]
     ## plot the resulting estimated track
-    plot(y~x, data=trueTrack, type="l", xlim=(c(min(c(hydros$hx, trueTrack$x)), max(c(hydros$hx, trueTrack$x)))), ylim=(c(min(c(hydros$hy, trueTrack$y)), max(c(hydros$hy, trueTrack$y)))), asp=1)
-    points(hy~hx, data=hydros, col="green", pch=20, cex=3)
-    lines(estimated_pos$Y~estimated_pos$X, col="red")
-  #      lines(teleTrack$y~teleTrack$x, col="green")
+    # plot(y~x, data=trueTrack, type="l", xlim=(c(min(c(hydros$hx, trueTrack$x)), max(c(hydros$hx, trueTrack$x)))), ylim=(c(min(c(hydros$hy, trueTrack$y)), max(c(hydros$hy, trueTrack$y)))), asp=1)
+    # points(hy~hx, data=hydros, col="green", pch=20, cex=3)
+    # lines(estimated_pos$Y~estimated_pos$X, col="red")
+    # lines(teleTrack$y~teleTrack$x, col="green")
     
     write.csv(real_error,paste(PATH,'/results/real_error_',csvtag,sep = ''))
     # write.csv(estimated_error,paste(PATH,'/results/estimated_error_',nametag,'.csv',sep = ''))
     # write.csv(estimated_pos,paste(PATH,'/results/yapsTrack_',nametag,'.csv',sep = ''))
     
-    # Write out mean, 5%, 95% percentile, and extra information (n, pingtype, mean_bi, shift, rep) in dataframe
+    # Write out mean of real error and extra information (n, pingtype, mean_bi, shift, rep) in dataframe
     summary[index,"rep"] <- metadata["rep",]
     summary[index,"n"] <- n
     summary[index,"pingType"] <- pingType
     summary[index,"mean_bi"] <- (rbi_min+rbi_max)/2
-    summary[index,"dist"] <- as.integer(metadata["dist",])
+    summary[index,"dist"] <- as.integer(metadata["dist",]) # in terms of distance to the array contour
     summary[index,"mean"] <- mean(real_error)
   
     index <- index+1
