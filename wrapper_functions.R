@@ -117,14 +117,46 @@ simulation <- function(trueTrack, hydros, pingType, sbi_mean=NA, sbi_sd=NA, rbi_
   rownames(hydros) = colnames(toa_rev_df) # only add column names of receivers => therefore run this before adding soundspeed
   toa_rev_df$ss <- teleTrack$ss
   
-  return(toa_rev_df)
+  return(list(toa_rev_df, teleTrack))
 }
 
 
+#' @param toa_data TOA dataframe with receivers and groups_pas in columns.
+#' @param chunklen length of each chunk witin each groups_pas 
+chunk_toa <- function(toa_data, chunklen){
+  toa_data$chunks <- NA
+  chunk_counter <- 1
+  len <- dim(toa_data)[1]
+  n <- ceiling(len/chunklen)
+  chunks <- c()
+  for (i in as.list(1:(n-1))){ # going until the before-last chunk, because the last chunk gets special treatment
+    chunks <- append(chunks, c(rep(chunk_counter,chunklen))) # changed i by chunk_couter
+    chunk_counter <- chunk_counter+1
+  }
+  if (len%%chunklen > 0.75*chunklen){ # take the last chunk separate only if it's 3/4 of chunklen
+    chunks <- append(chunks, c(rep(chunk_counter,chunklen))) # changed n by chunk_couter
+    chunk_counter <- chunk_counter+1
+  }
+  else{ # add last chunk to the before-last is the last one is too short
+    chunks <- append(chunks, c(rep(chunk_counter-1,chunklen))) # changed n by chunk_couter
+    # here don't increase chunk_counter, because previous chunk_counter is used
+  }
+  toa_data$chunks <- chunks[1:len]
 
-estimation <- function(pingType, hydros, toa_rev_df, rbi_min=NA, rbi_max=NA){
+  return(toa_data)
+}
+
+
+estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_max=NA){
   
+  # take only chunk under consideration of teletrack
+  teleTrack <- teleTrack[teleTrack$chunks==toa_rev_df$chunks[1],]
+    
+  # remove abundant columns
   toa_rev_df$ss <- NULL
+  toa_rev_df$chunks <- NULL
+  
+  # reformat to matrix
   toa <- t(data.matrix(toa_rev_df))
   
   if(pingType == 'sbi'){
@@ -133,29 +165,34 @@ estimation <- function(pingType, hydros, toa_rev_df, rbi_min=NA, rbi_max=NA){
     inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1, rbi_min=rbi_min, rbi_max=rbi_max)
   }
   
-  pl <- c()
-  maxIter <- ifelse(pingType=="sbi", 500, 5000)
-  outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
+  # return empty's if run doesn't succeed
+  estimated_pos <- data.frame()
+  real_error <- c()
+  estimated_error <- c()
   
-  # Estimates in pl
-  pl <- outTmb$pl
-  estimated_pos <- as.data.frame(pl$X)
-  colnames(estimated_pos) <- c('X')
-  estimated_pos$Y <- pl$Y
-  estimated_pos$Time <- pl$top
+  try({
+    pl <- c()
+    maxIter <- ifelse(pingType=="sbi", 500, 5000)
+    outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
+    
+    # Estimates in pl
+    pl <- outTmb$pl
+    estimated_pos <- as.data.frame(pl$X)
+    colnames(estimated_pos) <- c('X')
+    estimated_pos$Y <- pl$Y
+    estimated_pos$Time <- pl$top
+    
+    # Error estimates in plsd
+    plsd <- outTmb$plsd
+    estimated_pos$Xe <- plsd$X
+    estimated_pos$Ye <- plsd$Y
+    
+    x_diff <- pl$X-teleTrack$x
+    y_diff <- pl$Y-teleTrack$y
+    real_error <- sqrt(x_diff**2+y_diff**2)
+    estimated_error <- sqrt(plsd$X**2+plsd$Y**2)
+  })
   
-  # Error estimates in plsd
-  plsd <- outTmb$plsd
-  estimated_pos$Xe <- plsd$X
-  estimated_pos$Ye <- plsd$Y
-  
-  
-  x_diff <- pl$X-teleTrack$x
-  y_diff <- pl$Y-teleTrack$y
-  real_error <- sqrt(x_diff**2+y_diff**2)
-  estimated_error <- sqrt(plsd$X**2+plsd$Y**2)
-  
-  # return all info for use by Vemco
+  # return all info
   res_list <- list(estimated_pos, real_error, estimated_error)
-  
 }
