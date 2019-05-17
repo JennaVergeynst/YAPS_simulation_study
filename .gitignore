@@ -2,3 +2,4 @@ scratch/
 *.png
 results/
 .Rhistory
+*.csv

@@ -10,7 +10,7 @@ For all telemetry tracks:
 
 Files to run:
 - prepare_trueTracks.R : creates 200 different simulated tracks of 100,000 positions
-- prepare_toas.R : creates for each simulated track and each possible combination of settings a toa dataframe with metadata on the first 7 rows and a nametag containing the settings. The different settings are:
+- prepare_toas.R : creates for each simulated track and each possible combination of settings a toa-dataframe with metadata on the first 7 rows and a telemetry track (i.e. all the positions heard by the hydrophones in the current settings; a perfect estimation would estimate exactly the telemetry track). Both toa-dataframes and telemetry tracks get a nametag containing the settings. The different settings are:
     - ping type: sbi, rbi, pseudo-rbi (uncomment the one you run)
     - bi length
     - shift relative to array contour
