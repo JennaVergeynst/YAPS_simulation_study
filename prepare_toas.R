@@ -35,25 +35,27 @@ for (r in sequence(nb_repetitions)){
     for (i in sequence(length(mean_bi))){
       try({
         # for random burst interval
-        pingType <- 'rbi'
-        rbi_min <- min_bi[i]
-        rbi_max <- max_bi[i]
-        sbi_mean=NA
-        sbi_sd=NA
+        # pingType <- 'rbi'
+        # rbi_min <- min_bi[i]
+        # rbi_max <- max_bi[i]
+        # sbi_mean=NA
+        # sbi_sd=NA
         
         # for stable burst interval
-        # pingType <- 'sbi'
-        # sbi_mean <- mean_bi[i]
-        # sbi_sd <- 1e-4
-        # rbi_min <- NA
-        # rbi_max <- NA
+        pingType <- 'sbi'
+        sbi_mean <- mean_bi[i]
+        sbi_sd <- 1e-4
+        rbi_min <- NA
+        rbi_max <- NA
         
         # for pseudo-random burst interval
         # ...
         
         
-        toa_rev_df <- simulation(trueTrack, hydros, pingType, sbi_mean=sbi_mean, sbi_sd=sbi_sd, rbi_min=rbi_min, rbi_max=rbi_max, pNA=0.3, pMP=0.03)
-
+        sim_list <- simulation(trueTrack, hydros, pingType, sbi_mean=sbi_mean, sbi_sd=sbi_sd, rbi_min=rbi_min, rbi_max=rbi_max, pNA=0.3, pMP=0.03)
+        toa_rev_df <- sim_list[[1]]
+        teleTrack <- sim_list[[2]]
+        
         ## nametag for datafiles to write out
         nametag = paste0(pingType, toString(mean_bi[i]), '_dist', toString(dist), '_rep', toString(r))
         
@@ -62,7 +64,7 @@ for (r in sequence(nb_repetitions)){
                    "\nsbi_mean\t", sbi_mean, "\nsbi_sd\t", sbi_sd, 
                    "\ndist\t", dist, "\nrep\t", r, "\n"), file=file)
         write.table(toa_rev_df, file,sep=",",append=TRUE, row.names = FALSE)
-        #write.csv(toa_rev_df,paste(PATH,'/results/toa_dfs/toa_df_',nametag,'.csv',sep = ''))
+        write.csv(teleTrack,paste(PATH,'/results/teleTracks/teleTrack_',nametag,'.csv',sep = ''))
 
 
       })
