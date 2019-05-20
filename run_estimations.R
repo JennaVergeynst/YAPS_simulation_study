@@ -1,6 +1,7 @@
 rm(list=ls())
 graphics.off()
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
+# setwd('/home/hbak/H/ms/others/2019-04 JennaVergeynst - simulation study/git/YAPS_simulation_study')
 PATH <- getwd()
 toa_path <- paste0(PATH, '/results/toa_dfs/')
 tele_path <- paste0(PATH, '/results/teleTracks/')
@@ -10,7 +11,8 @@ library("parallel")
 library(dplyr)
 
 
-#set.seed(42)
+
+# set.seed(42) # seed needed for now to identify additional actions in the retry-mechanism...
 
 source("wrapper_functions.R")
 
@@ -23,9 +25,8 @@ index <- 1
 
 ######testing######
 #filename <- as.list(all_toas)[1]
-#filename <- "toa_df_sbi5_distNA_rep1.csv"
+filename <- "toa_df_sbi5_distNA_rep1.csv"
 ###################
-
 for (filename in as.list(all_toas)){
 #for (filename in as.list(filename)){
   toa_rev_df <- read.csv(paste0(toa_path,filename), skip = 7)
@@ -43,15 +44,16 @@ for (filename in as.list(all_toas)){
     teleTrack = read.csv(paste0(tele_path,"teleTrack_",csvtag))
     teleTrack$chunks <- toa_rev_df$chunks
     
-    cl = makeCluster(4)
+    cl = makeCluster(getOption("cl.cores", detectCores()))
     clusterExport(cl, list("estimation", "getInp", "runTmb"))
     est_list <- clusterApplyLB(cl, toa_list, estimation, teleTrack, pingType, hydros, rbi_min=rbi_min, rbi_max=rbi_max)
     estimated_pos <- bind_rows(lapply(est_list, '[[', 1))
     real_error <- unlist(lapply(est_list, '[[', 2))
     estimated_error <- unlist(lapply(est_list, '[[', 3))
-    
-    part <- toa_list[[3]]
-    test <- estimation(part, teleTrack, pingType, hydros, rbi_min=rbi_min, rbi_max=rbi_max)
+	stopCluster(cl)
+	
+    # part <- toa_list[[59]]
+    # test <- estimation(part, teleTrack, pingType, hydros, rbi_min=rbi_min, rbi_max=rbi_max)
 
     ## plot the resulting estimated track
     # plot(y~x, data=trueTrack, type="l", xlim=(c(min(c(hydros$hx, trueTrack$x)), max(c(hydros$hx, trueTrack$x)))), ylim=(c(min(c(hydros$hy, trueTrack$y)), max(c(hydros$hy, trueTrack$y)))), asp=1)

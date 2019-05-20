@@ -10,12 +10,17 @@ source("wrapper_functions.R")
 
 hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
 nb_repetitions <- 200 # nb of different simulated tracks for each setting
+nb_repetitions <- 3 # nb of different simulated tracks for each setting
 
-mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
+# mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
+# min_bi = c(1.1, 1, 9, 17, 45, 60)
+# max_bi = c(1.3, 9, 21, 33, 90, 120)
+# dist_to_array = c(NA, 0, 100, 200) # -NA means no shift
+
+mean_bi = c(5)
 min_bi = c(1.1, 1, 9, 17, 45, 60)
 max_bi = c(1.3, 9, 21, 33, 90, 120)
-
-dist_to_array = c(NA, 0, 100, 200) # -NA means no shift
+dist_to_array = c(NA) # -NA means no shift
 
 
 for (r in sequence(nb_repetitions)){

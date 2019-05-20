@@ -148,22 +148,18 @@ chunk_toa <- function(toa_data, chunklen){
 
 
 estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_max=NA){
-  
   # take only chunk under consideration of teletrack
+  # toa_rev_df <- toa_list[[59]]
+  set.seed(42) # needed while de-bugging
   teleTrack <- teleTrack[teleTrack$chunks==toa_rev_df$chunks[1],]
-    
+  chunk <-   toa_rev_df$chunks[1]
   # remove abundant columns
   toa_rev_df$ss <- NULL
   toa_rev_df$chunks <- NULL
   
   # reformat to matrix
   toa <- t(data.matrix(toa_rev_df))
-  
-  if(pingType == 'sbi'){
-    inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1)
-  } else if(pingType == 'rbi'){
-    inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1, rbi_min=rbi_min, rbi_max=rbi_max)
-  }
+  toa <- toa - min(toa, na.rm=TRUE) 
   
   # return empty's if run doesn't succeed
   estimated_pos <- data.frame()
@@ -172,9 +168,47 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
   
   try({
     pl <- c()
-    maxIter <- ifelse(pingType=="sbi", 500, 5000)
-    outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
-    
+	outTmb <- c()
+	yaps_done <- 0
+	i <- 1
+    while(i <= 100 & yaps_done != 1){
+ 	    if(pingType == 'sbi'){
+			inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1)
+			} else if(pingType == 'rbi'){
+			inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1, rbi_min=rbi_min, rbi_max=rbi_max)
+		}
+
+		# maxIter <- ifelse(pingType=="sbi", 500, 5000)
+		maxIter <- 	100*i^1.5
+		tryCatch({
+			outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
+		}, error=function(e){})
+		
+		# identify cases where runTmb fails and try again...
+		if(!is.null(outTmb)) {
+			if(sum(unlist(lapply(outTmb$plsd, FUN=is.na))) != 0){
+				yaps_done <- 0
+			} else if(outTmb[1] == "noOpt"){
+				yaps_done <- 0
+			} else if(outTmb$pl$log_t_part > -2.5){
+				yaps_done <- 0
+			} else {yaps_done <- 1}
+		} else {
+			yaps_done <- 0
+		}
+		
+		# temp for HBA debugging
+		# if(yaps_done == 0){
+			# gnu <- "gnu"
+			# save(gnu, file=paste0("/home/hbak/H/ms/others/2019-04 JennaVergeynst - simulation study/git/YAPS_simulation_study/results/outTmbs/status_",chunk,"i_",i,".rObj"))
+		# }
+
+		i <- i+1
+	}
+	
+	# # temp for HBA debugging
+	# if(yaps_done == 0) {outTmb <- 'noYaps'}
+	# save(outTmb, inp, teleTrack, file=paste0("/home/hbak/H/ms/others/2019-04 JennaVergeynst - simulation study/git/YAPS_simulation_study/results/outTmbs/outTmb_chunk_",chunk,"i_",i-1,".rObj"))
     # Estimates in pl
     pl <- outTmb$pl
     estimated_pos <- as.data.frame(pl$X)
