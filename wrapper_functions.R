@@ -178,6 +178,16 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
     maxIter <- ifelse(pingType=="sbi", 500, 5000)
     outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
     
+    outTmb <- NULL
+    attempt <- 1
+    
+    while(is.null(outTmb) && attempt <=5){
+      attempt <- attempt+1
+      try({
+        outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
+      })
+    }
+    
     # Estimates in pl
     pl <- outTmb$pl
     estimated_pos <- as.data.frame(pl$X)
