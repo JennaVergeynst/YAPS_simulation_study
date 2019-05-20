@@ -1,6 +1,9 @@
 rm(list=ls())
 graphics.off()
+## For R-studio:
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
+## Outside R-studio:
+#setwd(getSrcDirectory()[1])
 PATH <- getwd()
 toa_path <- paste0(PATH, '/results/toa_dfs/')
 tele_path <- paste0(PATH, '/results/teleTracks/')
@@ -50,15 +53,16 @@ for (filename in as.list(all_toas)){
     real_error <- unlist(lapply(est_list, '[[', 2))
     estimated_error <- unlist(lapply(est_list, '[[', 3))
     
-    part <- toa_list[[3]]
-    test <- estimation(part, teleTrack, pingType, hydros, rbi_min=rbi_min, rbi_max=rbi_max)
-
-    ## plot the resulting estimated track
-    # plot(y~x, data=trueTrack, type="l", xlim=(c(min(c(hydros$hx, trueTrack$x)), max(c(hydros$hx, trueTrack$x)))), ylim=(c(min(c(hydros$hy, trueTrack$y)), max(c(hydros$hy, trueTrack$y)))), asp=1)
-    # points(hy~hx, data=hydros, col="green", pch=20, cex=3)
-    # lines(estimated_pos$Y~estimated_pos$X, col="red")
-    # lines(teleTrack$y~teleTrack$x, col="green")
+    ######testing######
+    #part <- toa_list[[3]]
+    #test <- estimation(part, teleTrack, pingType, hydros, rbi_min=rbi_min, rbi_max=rbi_max)
+    ###################
     
+    ## plot the resulting estimated track
+    # plot(y~x, data=teleTrack, type="l", xlim=(c(min(c(hydros$hx, teleTrack$x)), max(c(hydros$hx, teleTrack$x)))), ylim=(c(min(c(hydros$hy, teleTrack$y)), max(c(hydros$hy, teleTrack$y)))), asp=1)
+    # points(hy~hx, data=hydros, col="green", pch=20, cex=3)
+    # lines(estimated_pos$Y~estimated_pos$X, col="red", lty="dashed")
+
     write.csv(real_error,paste(PATH,'/results/real_error_chunk_',toString(chunk_size),'_',csvtag,sep = ''))
     # write.csv(estimated_error,paste(PATH,'/results/estimated_error_',nametag,'.csv',sep = ''))
     # write.csv(estimated_pos,paste(PATH,'/results/yapsTrack_',nametag,'.csv',sep = ''))
