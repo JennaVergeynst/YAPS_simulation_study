@@ -158,6 +158,9 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
   
   # reformat to matrix
   toa <- t(data.matrix(toa_rev_df))
+  start_time_chunk <- min(toa, na.rm=TRUE)
+  toa <- toa - start_time_chunk
+  
   
   if(pingType == 'sbi'){
     inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1)
@@ -180,7 +183,7 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
     estimated_pos <- as.data.frame(pl$X)
     colnames(estimated_pos) <- c('X')
     estimated_pos$Y <- pl$Y
-    estimated_pos$Time <- pl$top
+    estimated_pos$Time <- pl$top + start_time_chunk
     
     # Error estimates in plsd
     plsd <- outTmb$plsd
