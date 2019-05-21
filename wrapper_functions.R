@@ -159,7 +159,8 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
   
   # reformat to matrix
   toa <- t(data.matrix(toa_rev_df))
-  toa <- toa - min(toa, na.rm=TRUE) 
+  toa_start_time <- min(toa, na.rm=TRUE) 
+  toa <- toa - toa_start_time
   
   # return empty's if run doesn't succeed
   estimated_pos <- data.frame()
@@ -214,7 +215,7 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
     estimated_pos <- as.data.frame(pl$X)
     colnames(estimated_pos) <- c('X')
     estimated_pos$Y <- pl$Y
-    estimated_pos$Time <- pl$top
+    estimated_pos$Time <- pl$top + toa_start_time
     
     # Error estimates in plsd
     plsd <- outTmb$plsd
