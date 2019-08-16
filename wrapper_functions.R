@@ -154,6 +154,7 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
     
   # remove abundant columns
   toa_rev_df$ss <- NULL
+  chunk_col <- toa_rev_df$chunks
   toa_rev_df$chunks <- NULL
   
   # reformat to matrix
@@ -172,6 +173,7 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
   estimated_pos <- data.frame()
   real_error <- c()
   estimated_error <- c()
+  chunk_info <- c()
   
   try({
     pl <- c()
@@ -204,8 +206,10 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
     y_diff <- pl$Y-teleTrack$y
     real_error <- sqrt(x_diff**2+y_diff**2)
     estimated_error <- sqrt(plsd$X**2+plsd$Y**2)
+    
+    chunk_info <- chunk_col
   })
   
   # return all info
-  res_list <- list(estimated_pos, real_error, estimated_error)
+  res_list <- list(estimated_pos, real_error, estimated_error, chunk_info)
 }
