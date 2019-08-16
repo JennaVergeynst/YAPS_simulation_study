@@ -75,6 +75,14 @@ for (filename in as.list(filename)){
   
   for (chunk_size in as.list(chunk_list)){
     write.csv(real_error[size_of_chunk==chunk_size],paste(PATH,'/results/real_error_chunk_',toString(chunk_size),'_',csvtag,sep = ''))
+    # Prints for verification:
+    print('chunksize:')
+    print(chunk_size)
+    print('Length of data:')
+    print(dim(toa_rev_superdf)[[1]])
+    print('Length of real error:')
+    print(length(real_error[size_of_chunk==chunk_size]))
+    
     # Write out mean of real error and extra information (chunk size, pingtype, mean_bi, shift, rep) in dataframe
     summary[index,"rep"] <- metadata["rep",]
     summary[index,"chunk_size"] <- chunk_size
