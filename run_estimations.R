@@ -4,6 +4,9 @@ graphics.off()
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
 ## Outside R-studio:
 #setwd(getSrcDirectory()[1])
+## On hpc:
+#setwd('/data/gent/vo/000/gvo00048/vsc41096/YAPS_simulation_study')
+
 PATH <- getwd()
 toa_path <- paste0(PATH, '/results/toa_dfs/')
 tele_path <- paste0(PATH, '/results/teleTracks/')
