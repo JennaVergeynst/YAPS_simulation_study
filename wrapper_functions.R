@@ -147,7 +147,7 @@ chunk_toa <- function(toa_data, chunklen){
 }
 
 
-estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_max=NA){
+estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_max=NA, summary, csvtag, PATH){
   
   # take only chunk under consideration of teletrack
   teleTrack <- teleTrack[teleTrack$chunks==toa_rev_df$chunks[1],]
@@ -174,6 +174,9 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
   real_error <- c()
   estimated_error <- c()
   chunk_info <- c()
+  
+  # Time!
+  ptm <- proc.time()
   
   try({
     pl <- c()
@@ -210,6 +213,18 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
     chunk_info <- chunk_col
   })
   
+  summary[1,"mean_real"] <- mean(real_error)
+  summary[1,"mean_est"] <- mean(estimated_error)
+  summary[1,"nb_pos"] <- length(real_error)
+  summary[1,"run_time"] <- (proc.time() - ptm)[[3]]
+  summary[1,"chunk_size"] <- strsplit(chunk_col[[1]], "_")[[1]][[1]]
+  summary[1,"chunk_nb"] <- strsplit(chunk_col[[1]], "_")[[1]][[2]]
+  
+  tbl_name <- paste0(PATH,'/results/summaries/', "summary_chunk_", chunk_col[[1]], "_", csvtag)
+  write.table(summary,tbl_name, sep=',', col.names=FALSE, row.names=FALSE)
+  write.csv(real_error,paste0(PATH,'/results/real_errors/real_error_chunk_',chunk_col[[1]], "_", csvtag))
+  write.csv(estimated_error,paste0(PATH,'/results/est_errors/est_error_chunk_',chunk_col[[1]], "_", csvtag))
   # return all info
-  res_list <- list(estimated_pos, real_error, estimated_error, chunk_info)
+  # res_list <- list(estimated_pos, real_error, estimated_error, chunk_info)
+  
 }
