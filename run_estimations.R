@@ -1,7 +1,10 @@
-rm(list=ls())
-graphics.off()
+#rm(list=ls())
+#graphics.off()
+#args = commandArgs(trailingOnly=TRUE)
+ID <- Sys.getenv("PBS_ARRAYID") # for job array running on hpc
 ## For R-studio:
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
+setwd('/Users/jennavergeynst/OneDrive - UGent/Sharing_code/YAPS_simulation_study')
 ## Outside R-studio:
 #setwd(getSrcDirectory()[1])
 ## On hpc:
@@ -22,15 +25,19 @@ source("wrapper_functions.R")
 
 all_toas <- list.files(toa_path)
 hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
-#chunk_list <- c(250, 500, 1000, 5000, 10000)
-chunk_list <- c(250)
+chunk_list <- c(250, 500, 1000, 5000, 10000)
+#chunk_list <- c(250)
 summary <- data.frame(matrix(ncol = 10, nrow = 1)) # nrow = length(all_toas)*length(chunk_list)
 colnames(summary) <- c("rep", "chunk_size", "chunk_nb", "pingType", "mean_bi", "dist", "mean_real", "mean_est", "nb_pos", "run_time")
 #index <- 1
 
+filenames <- read.csv('test_reps.csv')
+
 ######testing######
 #filename <- as.list(all_toas)[1]
-filename <- "toa_df_rbi5_distNA_rep1.csv"
+#filename <- "toa_df_rbi5_distNA_rep1.csv"
+#filename <- args[1]
+filename <- filenames$filename[[as.integer(ID)]]
 ###################
 
 #for (filename in as.list(all_toas)){
