@@ -31,7 +31,7 @@ summary <- data.frame(matrix(ncol = 10, nrow = 1)) # nrow = length(all_toas)*len
 colnames(summary) <- c("rep", "chunk_size", "chunk_nb", "pingType", "mean_bi", "dist", "mean_real", "mean_est", "nb_pos", "run_time")
 #index <- 1
 
-filenames <- read.csv('test_reps.csv')
+filenames <- read.csv('first_ten_reps.csv')
 
 ######testing######
 #filename <- as.list(all_toas)[1]

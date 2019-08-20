@@ -3,3 +3,9 @@ scratch/
 results/
 .Rhistory
 *.csv
+
+.RData
+.ipynb_checkpoints/
+Check_results.ipynb
+chunksize_rerun_timelimit_fails.R
+test_args.R
