@@ -8,19 +8,20 @@ library(yaps)
 
 source("wrapper_functions.R")
 
-hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
+#hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
 nb_repetitions <- 200 # nb of different simulated tracks for each setting
 
 mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
 min_bi = c(1.1, 1, 9, 17, 45, 60)
 max_bi = c(1.3, 9, 21, 33, 90, 120)
 
-dist_to_array = c(NA, 0, 100, 200) # -NA means no shift
-
+dist_to_array = c(NA) # -NA means no shift: first run toa's without shift
+# dist_to_array = c(NA, 0, 100, 200)
 
 for (r in sequence(nb_repetitions)){
   # Read in simulated true track
   trueTrack <- read.csv(paste(PATH,'/results/trueTracks/trueTrack_',toString(r),'.csv',sep = ''), row.names = 1)
+  hydros <- read.csv(paste(PATH,'/results/hydros/hydros_',toString(r),'.csv',sep = ''), row.names = 1)
 
   for (dist in as.list(dist_to_array)){
     if (!is.na(dist)){
@@ -34,21 +35,21 @@ for (r in sequence(nb_repetitions)){
 
     for (i in sequence(length(mean_bi))){
       try({
-        # for random burst interval
-        # pingType <- 'rbi'
-        # rbi_min <- min_bi[i]
-        # rbi_max <- max_bi[i]
-        # sbi_mean=NA
-        # sbi_sd=NA
+        ## for random burst interval
+        pingType <- 'rbi'
+        rbi_min <- min_bi[i]
+        rbi_max <- max_bi[i]
+        sbi_mean=NA
+        sbi_sd=NA
         
-        # for stable burst interval
-        pingType <- 'sbi'
-        sbi_mean <- mean_bi[i]
-        sbi_sd <- 1e-4
-        rbi_min <- NA
-        rbi_max <- NA
+        ## for stable burst interval
+        # pingType <- 'sbi'
+        # sbi_mean <- mean_bi[i]
+        # sbi_sd <- 1e-4
+        # rbi_min <- NA
+        # rbi_max <- NA
         
-        # for pseudo-random burst interval
+        ## for pseudo-random burst interval
         # ...
         
         
@@ -65,7 +66,7 @@ for (r in sequence(nb_repetitions)){
                    "\ndist\t", dist, "\nrep\t", r, "\n"), file=file)
         write.table(toa_rev_df, file,sep=",",append=TRUE, row.names = FALSE)
         write.csv(teleTrack,paste(PATH,'/results/teleTracks/teleTrack_',nametag,'.csv',sep = ''))
-
+       
 
       })
     }
