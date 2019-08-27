@@ -53,13 +53,34 @@ simHydros_adapted <- function(trueTrack){
   hy.min <- min(trueTrack$y) - 25
   hy.max <- max(trueTrack$y) + 25
   
-  hx.1 <- min(trueTrack$x) - 5
-  hx.2 <- max(trueTrack$x) + 5
-  hy.1 <- min(trueTrack$y) - 5
-  hy.2 <- max(trueTrack$y) + 5
+  x_extend_track = max(trueTrack$x) - min(trueTrack$x)
+  y_extend_track = max(trueTrack$y) - min(trueTrack$y)
+
+  hx.1 <- hx.min + x_extend_track/4
+  hx.2 <- hx.max - x_extend_track/4
+  hy.1 <- hy.min + y_extend_track/4
+  hy.2 <- hy.max - y_extend_track/4
   
-  hx <- c(hx.min,hx.min,hx.max,hx.max, 0, hx.1,  hx.1, hx.2, hx.2)
-  hy <- c(hy.min,hy.max,hy.max,hy.min, 0, hy.1,  hy.2, hy.1, hy.2)
+  Ox <- hx.min +  x_extend_track/2
+  Oy <- hy.min + y_extend_track/2
+  
+  hx <- c(hx.min,hx.min,hx.max,hx.max, Ox, hx.1,  hx.1, hx.2, hx.2)
+  hy <- c(hy.min,hy.max,hy.max,hy.min, Oy, hy.1,  hy.2, hy.1, hy.2)
+  
+  hydros <- data.frame(hx=hx, hy=hy)
+  
+  return(hydros)
+}
+
+simHydros <- function(auto=TRUE, trueTrack=NULL){
+  try(if(auto == TRUE & is.null(trueTrack)) stop("When auto is TRUE, trueTrack needs to be supplied"))
+  hx.min <- min(trueTrack$x) - 25
+  hx.max <- max(trueTrack$x) + 25
+  hy.min <- min(trueTrack$y) - 25
+  hy.max <- max(trueTrack$y) + 25
+  
+  hx <- c(hx.min,hx.min,hx.max,hx.max, 0, 500,  500, -500, -500)
+  hy <- c(hy.min,hy.max,hy.max,hy.min, 0, 500, -500, -500, 500)
   
   hydros <- data.frame(hx=hx, hy=hy)
   
