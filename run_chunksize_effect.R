@@ -88,8 +88,8 @@ summary[1,"dist"] <- as.integer(metadata["dist",]) # in terms of distance to the
 #test_result_list <- estimation(part_list[[1]], teleTrack_superdf, pingType, hydros, rbi_min, rbi_max)
 
 cl = makeCluster(6)
-clusterExport(cl, list("estimation", "getInp", "runTmb"))
-clusterApplyLB(cl, toa_list, estimation, teleTrack_superdf, pingType, hydros, rbi_min=rbi_min, rbi_max=rbi_max, summary, csvtag, PATH)
+clusterExport(cl, list("chunk_estimation", "getInp", "runTmb"))
+clusterApplyLB(cl, toa_list, chunk_estimation, teleTrack_superdf, pingType, hydros, rbi_min=rbi_min, rbi_max=rbi_max, summary, csvtag, PATH)
 
 
 

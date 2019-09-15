@@ -168,7 +168,7 @@ chunk_toa <- function(toa_data, chunklen){
 }
 
 
-estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_max=NA, summary, csvtag, PATH){
+chunk_estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_max=NA, summary, csvtag, PATH){
   
   # take only chunk under consideration of teletrack
   teleTrack <- teleTrack[teleTrack$chunks==toa_rev_df$chunks[1],]
