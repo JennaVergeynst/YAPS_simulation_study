@@ -18,8 +18,12 @@ source("wrapper_functions.R")
 # hydros <- data.frame(hx=hx, hy=hy)
 # write.csv(hydros,paste(PATH,'/results/hydros.csv',sep = ''))
 
-nb_repetitions <- 200 # nb of different simulated tracks for each setting
-n <- 100000
+# nb_repetitions <- 200 # nb of different simulated tracks for each setting
+# n <- 100000
+
+## test with short tracks of 500 positions!
+nb_repetitions <- 30
+n <- 500
 
 for (r in sequence(nb_repetitions)){
   # x0 <- stats::runif(1,hx.min,hx.max)
@@ -29,11 +33,15 @@ for (r in sequence(nb_repetitions)){
   # HERE TEMPORARILY READ IN TRUETRACK instead of simulating!
   # trueTrack <- read.csv(paste(PATH,'/results/trueTracks/trueTrack_',toString(r),'.csv',sep = ''), row.names = 1)
   hydros <- simHydros_adapted(trueTrack=trueTrack)
-  write.csv(trueTrack,paste(PATH,'/results/trueTracks/trueTrack_',toString(r),'.csv',sep = ''))
-  write.csv(hydros, paste(PATH,'/results/hydros/hydros_',toString(r),'.csv',sep = ''))
+  write.csv(trueTrack,paste(PATH,'/results_TEST_short_tracks/trueTracks/trueTrack_',toString(r),'.csv',sep = ''))
+  write.csv(hydros, paste(PATH,'/results_TEST_short_tracks/hydros/hydros_',toString(r),'.csv',sep = ''))
 }
 
-# true_track_example <- read.csv(paste0(PATH,'/results/trueTracks/trueTrack_1.csv'))
-# plot(true_track_example$x, true_track_example$y)
-# points(hydros$hx, hydros$hy, col='red')
-# plot(hydros)
+
+
+r <- 2
+trueTrack <- read.csv(paste(PATH,'/results/trueTracks/trueTrack_',toString(r),'.csv',sep = ''), row.names = 1)
+hydros <- simHydros_adapted(trueTrack=trueTrack)
+plot(trueTrack$x, trueTrack$y)
+points(hydros$hx, hydros$hy, col='red')
+

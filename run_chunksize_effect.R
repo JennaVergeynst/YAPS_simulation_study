@@ -3,17 +3,19 @@
 # to run 10 repetitions of 6 different rbi's (= 60 cases) in separate jobs
 # Total running time needed per job = 32?? + 40?? hours (less than 30 hours needed for jobs with  large bi's of 60/90)
 
-#args = commandArgs(trailingOnly=TRUE)
 ID <- Sys.getenv("PBS_ARRAYID") # for job array running on hpc
 ## On hpc:
 setwd('/data/gent/vo/000/gvo00048/vsc41096/YAPS_simulation_study')
 
+## Local:
 # rm(list=ls())
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
+
 PATH <- getwd()
-toa_path <- paste0(PATH, '/results/toa_dfs/')
-tele_path <- paste0(PATH, '/results/teleTracks/')
-hydro_path <- paste0(PATH, '/results/hydros/')
+pingType <- 'sbi'
+toa_path <- paste0(PATH, '/results_TEST_short_tracks/toa_dfs/', pingType,'/')
+tele_path <- paste0(PATH, '/results_TEST_short_tracks/teleTracks/', pingType,'/')
+hydro_path <- paste0(PATH, '/results_TEST_short_tracks/hydros/')
 
 library(yaps)
 library("parallel")
@@ -22,26 +24,37 @@ library(dplyr)
 
 source("wrapper_functions.R")
 
-#all_toas <- list.files(toa_path)
-chunk_list <- c(250, 500, 1000, 5000, 10000)
+chunk_list <- c(100, 250, 500)#, 1000, 5000, 10000)
 summary <- data.frame(matrix(ncol = 10, nrow = 1)) # nrow = length(all_toas)*length(chunk_list)
 colnames(summary) <- c("rep", "chunk_size", "chunk_nb", "pingType", "mean_bi", "dist", "mean_real", "mean_est", "nb_pos", "run_time")
 
-filenames <- read.csv('first_ten_reps.csv')
+## for TEST_short_track
+filenames <- data.frame(matrix(ncol=1, nrow=60))
+colnames(filenames) <- c("filenames")
+filenames$filenames <- list.files(toa_path)
+
+## for running first ten reps
+#filenames <- read.csv('first_ten_reps.csv')
+#filenames <- as.data.frame(sapply(filenames,gsub,pattern="rbi",replacement=pingType))
+
 
 ######testing######
 #filename <- as.list(all_toas)[1]
 #filename <- "toa_df_rbi5_distNA_rep1.csv"
-#filename <- args[1]
 filename <- filenames$filename[[as.integer(ID)]]
 ###################
 
 
 toa_rev_df <- read.csv(paste0(toa_path,filename), skip = 7)
 metadata <- read.csv(paste0(toa_path,filename), nrows = 7, sep='\t', header = FALSE, row.names = 1, stringsAsFactors = FALSE)
-pingType = metadata["pingType",]
+#pingType = metadata["pingType",]
 rbi_min = as.double(metadata["rbi_min",])
 rbi_max = as.double(metadata["rbi_max",])
+mean_bi = (rbi_min+rbi_max)/2
+if (is.na(rbi_min)){
+  mean_bi = as.double(metadata["sbi_mean",])
+}
+
 
 csvtag = substring(filename, 8)
 last_part <- strsplit(csvtag,'_')[[1]][[3]]
@@ -68,13 +81,13 @@ toa_list = split(toa_rev_superdf, toa_rev_superdf$chunks)
 # Fill in part of the summary
 summary[1,"rep"] <- metadata["rep",]
 summary[1,"pingType"] <- pingType
-summary[1,"mean_bi"] <- (rbi_min+rbi_max)/2
+summary[1,"mean_bi"] <- mean_bi
 summary[1,"dist"] <- as.integer(metadata["dist",]) # in terms of distance to the array contour
 
 #part_list <- toa_list[1:4]
 #test_result_list <- estimation(part_list[[1]], teleTrack_superdf, pingType, hydros, rbi_min, rbi_max)
 
-cl = makeCluster(18)
+cl = makeCluster(6)
 clusterExport(cl, list("estimation", "getInp", "runTmb"))
 clusterApplyLB(cl, toa_list, estimation, teleTrack_superdf, pingType, hydros, rbi_min=rbi_min, rbi_max=rbi_max, summary, csvtag, PATH)
 

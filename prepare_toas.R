@@ -1,27 +1,30 @@
+## Prepare TOA-dfs and teleTracks, starting from trueTracks and hydros
+## Local:
 rm(list=ls())
 graphics.off()
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
+
+## On hpc:
+# setwd('/data/gent/vo/000/gvo00048/vsc41096/YAPS_simulation_study')
+
 PATH = getwd()
 library(yaps)
-#set.seed(42)
-
 
 source("wrapper_functions.R")
 
-#hydros <- read.csv(paste(PATH,'/results/hydros.csv',sep = ''), row.names = 1)
-nb_repetitions <- 200 # nb of different simulated tracks for each setting
+nb_repetitions <- 30#200 # nb of different simulated tracks for each setting
 
-mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
-min_bi = c(1.1, 1, 9, 17, 45, 60)
-max_bi = c(1.3, 9, 21, 33, 90, 120)
+mean_bi = c(1.2, 5)#, 15, 25, 67.5, 90)
+min_bi = c(1.1, 1)#, 9, 17, 45, 60)
+max_bi = c(1.3, 9)#, 21, 33, 90, 120)
 
 dist_to_array = c(NA) # -NA means no shift: first run toa's without shift
 # dist_to_array = c(NA, 0, 100, 200)
 
 for (r in sequence(nb_repetitions)){
   # Read in simulated true track
-  trueTrack <- read.csv(paste(PATH,'/results/trueTracks/trueTrack_',toString(r),'.csv',sep = ''), row.names = 1)
-  hydros <- read.csv(paste(PATH,'/results/hydros/hydros_',toString(r),'.csv',sep = ''), row.names = 1)
+  trueTrack <- read.csv(paste(PATH,'/results_TEST_short_tracks/trueTracks/trueTrack_',toString(r),'.csv',sep = ''), row.names = 1)
+  hydros <- read.csv(paste(PATH,'/results_TEST_short_tracks/hydros/hydros_',toString(r),'.csv',sep = ''), row.names = 1)
 
   for (dist in as.list(dist_to_array)){
     if (!is.na(dist)){
@@ -36,18 +39,18 @@ for (r in sequence(nb_repetitions)){
     for (i in sequence(length(mean_bi))){
       try({
         ## for random burst interval
-        pingType <- 'rbi'
-        rbi_min <- min_bi[i]
-        rbi_max <- max_bi[i]
-        sbi_mean=NA
-        sbi_sd=NA
+        # pingType <- 'rbi'
+        # rbi_min <- min_bi[i]
+        # rbi_max <- max_bi[i]
+        # sbi_mean=NA
+        # sbi_sd=NA
         
         ## for stable burst interval
-        # pingType <- 'sbi'
-        # sbi_mean <- mean_bi[i]
-        # sbi_sd <- 1e-4
-        # rbi_min <- NA
-        # rbi_max <- NA
+        pingType <- 'sbi'
+        sbi_mean <- mean_bi[i]
+        sbi_sd <- 1e-4
+        rbi_min <- NA
+        rbi_max <- NA
         
         ## for pseudo-random burst interval
         # ...
@@ -60,16 +63,18 @@ for (r in sequence(nb_repetitions)){
         ## nametag for datafiles to write out
         nametag = paste0(pingType, toString(mean_bi[i]), '_dist', toString(dist), '_rep', toString(r))
         
-        file = paste(PATH,'/results/toa_dfs/toa_df_',nametag,'.csv',sep = '')
+        file = paste(PATH,'/results_TEST_short_tracks/toa_dfs/',pingType,'/toa_df_',nametag,'.csv',sep = '')
         cat(paste0("pingType\t", pingType, "\nrbi_min\t", rbi_min, "\nrbi_max\t", rbi_max, 
                    "\nsbi_mean\t", sbi_mean, "\nsbi_sd\t", sbi_sd, 
                    "\ndist\t", dist, "\nrep\t", r, "\n"), file=file)
         write.table(toa_rev_df, file,sep=",",append=TRUE, row.names = FALSE)
-        write.csv(teleTrack,paste(PATH,'/results/teleTracks/teleTrack_',nametag,'.csv',sep = ''))
+        write.csv(teleTrack,paste(PATH,'/results_TEST_short_tracks/teleTracks/',pingType,'/teleTrack_',nametag,'.csv',sep = ''))
        
 
       })
     }
   }
 }
-
+plot(trueTrack$x, trueTrack$y)
+plot(teleTrack$x, teleTrack$y)
+plot(hydros$hx, hydros$hy)
