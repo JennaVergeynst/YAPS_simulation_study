@@ -250,3 +250,109 @@ chunk_estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA
   # res_list <- list(estimated_pos, real_error, estimated_error, chunk_info)
   
 }
+
+readfiles <- function(result_path, n, mean_bi, dist, r, pingType){
+  hydros <- read.csv(paste0(result_path,'hydros/hydros',toString(n), '_',toString(r),'.csv'), row.names = 1)
+  
+  nametag = paste0(toString(n), '_', pingType, toString(mean_bi), '_dist', toString(dist), '_rep', toString(r))
+  
+  toa_file = paste0(result_path,'toa_dfs/',pingType,'/toa_df_',nametag,'.csv')
+  toa_df = read.csv(toa_file, skip = 7)  
+  metadata <- read.csv(toa_file, nrows = 7, sep='\t', header = FALSE, row.names = 1, stringsAsFactors = FALSE)
+  
+  tele_file = paste0(result_path,'teleTracks/',pingType,'/teleTrack_',nametag,'.csv')
+  teleTrack = read.csv(toa_file, skip = 7)  
+  
+  summary <- data.frame(matrix(ncol = 9, nrow = 1))
+  colnames(summary) <- c("rep", "track_length", "pingType", "mean_bi", "dist", "mean_real", "mean_est", "nb_pos", "run_time")
+  # Fill in part of the summary
+  summary[1,"rep"] <- r
+  summary[1,"pingType"] <- pingType
+  summary[1,"mean_bi"] <- mean_bi
+  summary[1,"dist"] <- dist
+  
+  
+  return(list(hydros, toa_df, teleTrack, summary, metadata))
+}
+
+readin_and_estim <- function(combo, result_path, dist, r, pingType){
+  mean_bi = combo$mean_bi
+  n = combo$track_length 
+  res = readfiles(result_path, n, mean_bi, dist, r, pingType)
+  hydros = res[[1]]
+  toa_df = res[[2]]
+  teleTrack = res[[3]]
+  summary = res[[4]]
+  metadata = res[[5]]
+  
+  nametag = paste0(toString(n), '_', pingType, toString(mean_bi), '_dist', toString(dist), '_rep', toString(r))
+  
+  # remove abundant columns
+  toa_df$ss <- NULL
+  
+  # reformat to matrix
+  toa <- t(data.matrix(toa_df))
+  
+  if(pingType == 'sbi'){
+    inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1)
+  } else if(pingType == 'rbi'){
+    rbi_min = as.double(metadata["rbi_min",])
+    rbi_max = as.double(metadata["rbi_max",])
+    inp <- getInp(hydros, toa, E_dist="Mixture", n_ss=10, pingType=pingType, sdInits=1, rbi_min=rbi_min, rbi_max=rbi_max)
+  }
+  
+  # return empty's if run doesn't succeed
+  estimated_pos <- data.frame()
+  real_error <- c()
+  estimated_error <- c()
+  
+  # Time!
+  ptm <- proc.time()
+  
+  try({
+    pl <- c()
+    maxIter <- ifelse(pingType=="sbi", 500, 5000)
+    outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
+    
+    outTmb <- NULL
+    attempt <- 1
+    
+    while(is.null(outTmb) && attempt <=5){
+      attempt <- attempt+1
+      try({
+        outTmb <- runTmb(inp, maxIter=maxIter, getPlsd=TRUE, getRep=TRUE)
+      })
+    }
+    
+    # Estimates in pl
+    pl <- outTmb$pl
+    estimated_pos <- as.data.frame(pl$X)
+    colnames(estimated_pos) <- c('X')
+    estimated_pos$Y <- pl$Y
+    estimated_pos$Time <- pl$top + start_time_chunk
+    
+    # Error estimates in plsd
+    plsd <- outTmb$plsd
+    estimated_pos$Xe <- plsd$X
+    estimated_pos$Ye <- plsd$Y
+    
+    x_diff <- pl$X-teleTrack$x
+    y_diff <- pl$Y-teleTrack$y
+    real_error <- sqrt(x_diff**2+y_diff**2)
+    estimated_error <- sqrt(plsd$X**2+plsd$Y**2)
+    
+  })
+  
+  summary[1,"mean_real"] <- mean(real_error)
+  summary[1,"mean_est"] <- mean(estimated_error)
+  summary[1,"nb_pos"] <- length(real_error)
+  summary[1,"run_time"] <- (proc.time() - ptm)[[3]]
+  summary[1,"track_length"] <- n
+  
+  tbl_name <- paste0(result_path,'summaries/', pingType, "/summary", nametag,'.csv')
+  write.table(summary,tbl_name, sep=',', col.names=FALSE, row.names=FALSE)
+  write.csv(real_error, paste0(result_path,'real_errors/', pingType, '/real_error_',nametag,'.csv'))
+  write.csv(estimated_error, paste0(result_path,'est_errors/', pingType, '/est_error_chunk_',nametag,'.csv'))
+  write.csv(estimated_pos, paste0(result_path,'yaps_tracks/', pingType, '/yaps_track_',nametag,'.csv'))
+  
+}
