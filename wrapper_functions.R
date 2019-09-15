@@ -48,24 +48,24 @@ simTrueTrack <- function(model='rw', n, deltaTime=1, D=NULL, shape=NULL, scale=N
 
 
 simHydros_adapted <- function(trueTrack){
-  hx.min <- min(trueTrack$x) - 25
-  hx.max <- max(trueTrack$x) + 25
-  hy.min <- min(trueTrack$y) - 25
-  hy.max <- max(trueTrack$y) + 25
+  hx.min <- min(trueTrack$x) - 5
+  hx.max <- max(trueTrack$x) + 5
+  hy.min <- min(trueTrack$y) - 5
+  hy.max <- max(trueTrack$y) + 5
   
   x_extend_track = max(trueTrack$x) - min(trueTrack$x)
   y_extend_track = max(trueTrack$y) - min(trueTrack$y)
 
-  hx.1 <- hx.min + x_extend_track/4
-  hx.2 <- hx.max - x_extend_track/4
-  hy.1 <- hy.min + y_extend_track/4
-  hy.2 <- hy.max - y_extend_track/4
+  hx.1 <- hx.min + x_extend_track/3
+  hx.2 <- hx.max - x_extend_track/3
+  hy.1 <- hy.min + y_extend_track/3
+  hy.2 <- hy.max - y_extend_track/3
   
   Ox <- hx.min +  x_extend_track/2
   Oy <- hy.min + y_extend_track/2
   
-  hx <- c(hx.min,hx.min,hx.max,hx.max, Ox, hx.1,  hx.1, hx.2, hx.2)
-  hy <- c(hy.min,hy.max,hy.max,hy.min, Oy, hy.1,  hy.2, hy.1, hy.2)
+  hx <- c(hx.min,hx.min,hx.max,hx.max, hx.1, hx.1, hx.2, hx.2) #Ox
+  hy <- c(hy.min,hy.max,hy.max,hy.min, hy.1, hy.2, hy.1, hy.2) #Oy
   
   hydros <- data.frame(hx=hx, hy=hy)
   
@@ -241,10 +241,11 @@ estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA, rbi_
   summary[1,"chunk_size"] <- strsplit(chunk_col[[1]], "_")[[1]][[1]]
   summary[1,"chunk_nb"] <- strsplit(chunk_col[[1]], "_")[[1]][[2]]
   
-  tbl_name <- paste0(PATH,'/results/summaries/', "summary_chunk_", chunk_col[[1]], "_", csvtag)
+  tbl_name <- paste0(PATH,'/results/summaries/', pingType, "/summary_chunk_", chunk_col[[1]], "_", csvtag)
   write.table(summary,tbl_name, sep=',', col.names=FALSE, row.names=FALSE)
-  write.csv(real_error,paste0(PATH,'/results/real_errors/real_error_chunk_',chunk_col[[1]], "_", csvtag))
-  write.csv(estimated_error,paste0(PATH,'/results/est_errors/est_error_chunk_',chunk_col[[1]], "_", csvtag))
+  write.csv(real_error, paste0(PATH,'/results/real_errors/', pingType, '/real_error_chunk_',chunk_col[[1]], "_", csvtag))
+  write.csv(estimated_error, paste0(PATH,'/results/est_errors/', pingType, '/est_error_chunk_',chunk_col[[1]], "_", csvtag))
+  write.csv(estimated_pos, paste0(PATH,'/results/yaps_tracks/', pingType, '/yaps_track_',chunk_col[[1]], "_", csvtag))
   # return all info
   # res_list <- list(estimated_pos, real_error, estimated_error, chunk_info)
   
