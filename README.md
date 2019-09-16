@@ -1,6 +1,6 @@
 # SIMULATION STUDY
 
-200 simulated tracks of length 100,000
+200 simulated tracks of different lengths (500,1000,5000)
 - correlated random walk, shape=1, scale=0.5
 - DielPattern added
 
@@ -9,12 +9,13 @@ For all telemetry tracks:
 - p(MP) = 0.03 (aspect quite high multipath in all case studies)
 
 Files to run:
-- prepare_trueTracks.R : creates 200 different simulated tracks of 100,000 positions
+- prepare_trueTracks.R : creates simulated tracks and corresponding hydrophone lay-out for N repetitions and different track lengths
 - prepare_toas.R : creates for each simulated track and each possible combination of settings a toa-dataframe with metadata on the first 7 rows and a telemetry track (i.e. all the positions heard by the hydrophones in the current settings; a perfect estimation would estimate exactly the telemetry track). Both toa-dataframes and telemetry tracks get a nametag containing the settings. The different settings are:
     - ping type: sbi, rbi, pseudo-rbi (uncomment the one you run)
     - bi length
     - shift relative to array contour
-- run_estimations.R : estimates yaps-track for each toa dataframe and writes away the mean error and metadata (i.e. settings) of the track in a table. The idea is to run this first for the toa dataframes of rbi and its different bi lengths, with different chunk sizes in the paralellization process. The optimal chunk size that results from this run can then be used for the estimations on the remaining toa dataframes.
+- (run_chunksize_effect.R : to find optimal chunk size) => dropped
+- run_tracklength_effect.R : find effect of track length
 
 
 ## Effect of ping type
@@ -53,6 +54,9 @@ For each track (of 200):
 - 3 pingTypes
 - 6 burst interval lengths
 - => 3x6x3x200 = 10800 runs or estimations
+
+## Effect of receiver range
+*Coming soon*
 
 
 ## TOTAL:
