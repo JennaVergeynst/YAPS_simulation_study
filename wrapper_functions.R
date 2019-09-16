@@ -261,7 +261,7 @@ readfiles <- function(result_path, n, mean_bi, dist, r, pingType){
   metadata <- read.csv(toa_file, nrows = 7, sep='\t', header = FALSE, row.names = 1, stringsAsFactors = FALSE)
   
   tele_file = paste0(result_path,'teleTracks/',pingType,'/teleTrack_',nametag,'.csv')
-  teleTrack = read.csv(toa_file, skip = 7)  
+  teleTrack = read.csv(tele_file)  
   
   summary <- data.frame(matrix(ncol = 9, nrow = 1))
   colnames(summary) <- c("rep", "track_length", "pingType", "mean_bi", "dist", "mean_real", "mean_est", "nb_pos", "run_time")
@@ -329,7 +329,7 @@ readin_and_estim <- function(combo, result_path, dist, r, pingType){
     estimated_pos <- as.data.frame(pl$X)
     colnames(estimated_pos) <- c('X')
     estimated_pos$Y <- pl$Y
-    estimated_pos$Time <- pl$top + start_time_chunk
+    estimated_pos$Time <- pl$top
     
     # Error estimates in plsd
     plsd <- outTmb$plsd
@@ -352,7 +352,7 @@ readin_and_estim <- function(combo, result_path, dist, r, pingType){
   tbl_name <- paste0(result_path,'summaries/', pingType, "/summary", nametag,'.csv')
   write.table(summary,tbl_name, sep=',', col.names=FALSE, row.names=FALSE)
   write.csv(real_error, paste0(result_path,'real_errors/', pingType, '/real_error_',nametag,'.csv'))
-  write.csv(estimated_error, paste0(result_path,'est_errors/', pingType, '/est_error_chunk_',nametag,'.csv'))
+  write.csv(estimated_error, paste0(result_path,'est_errors/', pingType, '/est_error_',nametag,'.csv'))
   write.csv(estimated_pos, paste0(result_path,'yaps_tracks/', pingType, '/yaps_track_',nametag,'.csv'))
   
 }

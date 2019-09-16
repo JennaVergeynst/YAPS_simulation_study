@@ -35,7 +35,7 @@ for (n in as.list(track_lengths)){
   }
 }
 
-cl = makeCluster(4)
+cl = makeCluster(18)
 clusterExport(cl, list("readfiles", "readin_and_estim", "getInp", "runTmb"))
 clusterApplyLB(cl, combos_list, readin_and_estim, result_path, dist='NA', r, pingType)
 
