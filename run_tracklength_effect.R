@@ -22,7 +22,7 @@ source("wrapper_functions.R")
 pingType <- 'sbi'
 track_lengths <- c(500, 1000, 5000)
 mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
-# make dataframe combining parameters track_legth and mean_bi
+# make dataframe combining parameters track_length and mean_bi
 
 combos_list = list()
 for (n in as.list(track_lengths)){
