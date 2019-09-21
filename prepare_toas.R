@@ -14,16 +14,16 @@ source("wrapper_functions.R")
 
 result_path = paste0(PATH, '/results_short_tracks/')
 # nb_repetitions <- 30#200 # nb of different simulated tracks for each setting
-repetitions <- 1:10 # only make toa's of first 10 repetitions
+repetitions <- 1:30 
 track_lengths <- c(500, 1000, 5000)
-
+pingType <- 'sbi'
 
 mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
 min_bi = c(1.1, 1, 9, 17, 45, 60)
 max_bi = c(1.3, 9, 21, 33, 90, 120)
 
-dist_to_array = c(NA) # -NA means no shift: first run toa's without shift
-# dist_to_array = c(NA, 0, 100, 200)
+#shifts = c(0) # -NA means no shift: first run toa's without shift
+shifts = c(1, 2) # shift = nb of array-lengths the track is moved to the right
 
 for (n in as.list(track_lengths)){
 #  for (r in sequence(nb_repetitions)){
@@ -32,32 +32,27 @@ for (n in as.list(track_lengths)){
     trueTrack <- read.csv(paste(PATH,'/results_short_tracks/trueTracks/trueTrack',toString(n), '_',toString(r),'.csv',sep = ''), row.names = 1)
     hydros <- read.csv(paste(PATH,'/results_short_tracks/hydros/hydros',toString(n), '_',toString(r),'.csv',sep = ''), row.names = 1)
     
-    for (dist in as.list(dist_to_array)){
-      if (!is.na(dist)){
-        # shift the track so that the distance from its closest point 
-        # to the array contour equals 'dist' meter
-        trueTrack <- shift_trueTrack(trueTrack, dist_to_array=dist)
-        # plot(hydros, xlim = c(-250, 1000))
-        # lines(trueTrack$x, trueTrack$y, col='red')
-        # lines(shifted_trueTrack$x, shifted_trueTrack$y, col='blue')
-      }
-      
+    for (shift in as.list(shifts)){
+      trueTrack <- shift_trueTrack(trueTrack, hydros, shift)
       for (i in sequence(length(mean_bi))){
         try({
           ## for random burst interval
-          # pingType <- 'rbi'
-          # rbi_min <- min_bi[i]
-          # rbi_max <- max_bi[i]
-          # sbi_mean=NA
-          # sbi_sd=NA
+          if (pingType == 'rbi'){
+            rbi_min <- min_bi[i]
+            rbi_max <- max_bi[i]
+            sbi_mean=NA
+            sbi_sd=NA
+          }
+
           
           ## for stable burst interval
-          pingType <- 'sbi'
-          sbi_mean <- mean_bi[i]
-          sbi_sd <- 1e-4
-          rbi_min <- NA
-          rbi_max <- NA
-          
+          if (pingType=='sbi'){
+            sbi_mean <- mean_bi[i]
+            sbi_sd <- 1e-4
+            rbi_min <- NA
+            rbi_max <- NA
+          }
+
           ## for pseudo-random burst interval
           # ...
           
@@ -66,12 +61,12 @@ for (n in as.list(track_lengths)){
           teleTrack <- sim_list[[2]]
           
           ## nametag for datafiles to write out
-          nametag = paste0(toString(n), '_', pingType, toString(mean_bi[i]), '_dist', toString(dist), '_rep', toString(r))
+          nametag = paste0(toString(n), '_', pingType, toString(mean_bi[i]), '_shift', toString(shift), '_rep', toString(r))
           
           file = paste(result_path,'toa_dfs/',pingType,'/toa_df_',nametag,'.csv',sep = '')
           cat(paste0("pingType\t", pingType, "\nrbi_min\t", rbi_min, "\nrbi_max\t", rbi_max, 
                      "\nsbi_mean\t", sbi_mean, "\nsbi_sd\t", sbi_sd, 
-                     "\ndist\t", dist, "\nrep\t", r, "\n"), file=file)
+                     "\nshift\t", shift, "\nrep\t", r, "\n"), file=file)
           write.table(toa_rev_df, file,sep=",",append=TRUE, row.names = FALSE)
           write.csv(teleTrack,paste(result_path,'teleTracks/',pingType,'/teleTrack_',nametag,'.csv',sep = ''))
           
