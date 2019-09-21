@@ -107,11 +107,10 @@ shift_hydros <- function(hydros, trueTrack, shift=1/2){
   return(hydros_shifted)
 }
 
-shift_trueTrack <- function(trueTrack, dist_to_array=0){
-  min.x <- min(trueTrack$x)
-  shift <- 250+dist_to_array-min.x
+shift_trueTrack <- function(trueTrack, hydros, shift){
+  x_width <- max(hydros$hx)-min(hydros$hx)
   trueTrack_shifted <- trueTrack
-  trueTrack_shifted$x <- trueTrack$x + shift
+  trueTrack_shifted$x <- trueTrack$x + shift*x_width
   
   return(trueTrack_shifted)
 }
@@ -251,10 +250,10 @@ chunk_estimation <- function(toa_rev_df, teleTrack, pingType, hydros, rbi_min=NA
   
 }
 
-readfiles <- function(result_path, n, mean_bi, dist, r, pingType){
+readfiles <- function(result_path, n, mean_bi, shift, r, pingType){
   hydros <- read.csv(paste0(result_path,'hydros/hydros',toString(n), '_',toString(r),'.csv'), row.names = 1)
   
-  nametag = paste0(toString(n), '_', pingType, toString(mean_bi), '_dist', toString(dist), '_rep', toString(r))
+  nametag = paste0(toString(n), '_', pingType, toString(mean_bi), '_shift', toString(shift), '_rep', toString(r))
   
   toa_file = paste0(result_path,'toa_dfs/',pingType,'/toa_df_',nametag,'.csv')
   toa_df = read.csv(toa_file, skip = 7)  
@@ -264,28 +263,28 @@ readfiles <- function(result_path, n, mean_bi, dist, r, pingType){
   teleTrack = read.csv(tele_file)  
   
   summary <- data.frame(matrix(ncol = 9, nrow = 1))
-  colnames(summary) <- c("rep", "track_length", "pingType", "mean_bi", "dist", "mean_real", "mean_est", "nb_pos", "run_time")
+  colnames(summary) <- c("rep", "track_length", "pingType", "mean_bi", "shift", "mean_real", "mean_est", "nb_pos", "run_time")
   # Fill in part of the summary
   summary[1,"rep"] <- r
   summary[1,"pingType"] <- pingType
   summary[1,"mean_bi"] <- mean_bi
-  summary[1,"dist"] <- dist
+  summary[1,"shift"] <- shift
   
   
   return(list(hydros, toa_df, teleTrack, summary, metadata))
 }
 
-readin_and_estim <- function(combo, result_path, dist, r, pingType){
+readin_and_estim <- function(combo, result_path, shift, r, pingType){
   mean_bi = combo$mean_bi
   n = combo$track_length 
-  res = readfiles(result_path, n, mean_bi, dist, r, pingType)
+  res = readfiles(result_path, n, mean_bi, shift, r, pingType)
   hydros = res[[1]]
   toa_df = res[[2]]
   teleTrack = res[[3]]
   summary = res[[4]]
   metadata = res[[5]]
   
-  nametag = paste0(toString(n), '_', pingType, toString(mean_bi), '_dist', toString(dist), '_rep', toString(r))
+  nametag = paste0(toString(n), '_', pingType, toString(mean_bi), '_shift', toString(shift), '_rep', toString(r))
   
   # remove abundant columns
   toa_df$ss <- NULL
