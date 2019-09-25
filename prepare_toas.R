@@ -22,8 +22,7 @@ mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
 min_bi = c(1.1, 1, 9, 17, 45, 60)
 max_bi = c(1.3, 9, 21, 33, 90, 120)
 
-#shifts = c(0) # -NA means no shift: first run toa's without shift
-shifts = c(1, 2) # shift = nb of array-lengths the track is moved to the right
+shifts = c(0, 0.5, 1, 2) # shift = nb of array-lengths the track is moved to the right
 
 for (n in as.list(track_lengths)){
 #  for (r in sequence(nb_repetitions)){
