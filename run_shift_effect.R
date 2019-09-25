@@ -22,7 +22,6 @@ source("wrapper_functions.R")
 pingType <- 'sbi'
 track_lengths <- c(500, 1000, 5000)
 mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
-distances = c(0, 100, 200)
 shifts = c(0, 0.5, 1, 2)
 # make dataframe combining parameters track_length and mean_bi
 
