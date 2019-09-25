@@ -274,9 +274,10 @@ readfiles <- function(result_path, n, mean_bi, shift, r, pingType){
   return(list(hydros, toa_df, teleTrack, summary, metadata))
 }
 
-readin_and_estim <- function(combo, result_path, shift, r, pingType){
+readin_and_estim <- function(combo, result_path, r, pingType){
   mean_bi = combo$mean_bi
   n = combo$track_length 
+  shift = combo$shift
   res = readfiles(result_path, n, mean_bi, shift, r, pingType)
   hydros = res[[1]]
   toa_df = res[[2]]
