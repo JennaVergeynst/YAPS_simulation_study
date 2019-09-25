@@ -23,8 +23,9 @@ pingType <- 'sbi'
 track_lengths <- c(500, 1000, 5000)
 mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
 shifts = c(0, 0.5, 1, 2)
-# make dataframe combining parameters track_length and mean_bi
+## shift = nb of array-lengths the track is moved to the right
 
+## make dataframe combining parameters track_length, mean_bi and shift
 combos_list = list()
 for (n in as.list(track_lengths)){
   for (mb in as.list(mean_bi)){
