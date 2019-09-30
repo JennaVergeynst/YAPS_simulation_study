@@ -1,6 +1,6 @@
 scratch/
 *.png
-results/
+results_long_tracks_with_chunks/
 .Rhistory
 *.csv
 
@@ -9,4 +9,3 @@ results/
 Check_results.ipynb
 chunksize_rerun_timelimit_fails.R
 test_args.R
-results_short_tracks/
