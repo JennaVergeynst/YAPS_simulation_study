@@ -12,11 +12,11 @@ library(yaps)
 
 source("wrapper_functions.R")
 
-result_path = paste0(PATH, '/results_short_tracks/')
+result_path = paste0(PATH, '/results/')
 # nb_repetitions <- 30#200 # nb of different simulated tracks for each setting
 repetitions <- 1:30 
-track_lengths <- c(500, 1000, 5000)
-pingType <- 'sbi'
+track_lengths <- c(500, 1000, 5000,10000)
+pingType <- 'rbi'
 
 mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
 min_bi = c(1.1, 1, 9, 17, 45, 60)
@@ -28,8 +28,8 @@ for (n in as.list(track_lengths)){
 #  for (r in sequence(nb_repetitions)){
   for (r in as.list(repetitions)){
     # Read in simulated true track
-    trueTrack <- read.csv(paste(PATH,'/results_short_tracks/trueTracks/trueTrack',toString(n), '_',toString(r),'.csv',sep = ''), row.names = 1)
-    hydros <- read.csv(paste(PATH,'/results_short_tracks/hydros/hydros',toString(n), '_',toString(r),'.csv',sep = ''), row.names = 1)
+    trueTrack <- read.csv(paste(result_path,'/trueTracks/trueTrack',toString(n), '_',toString(r),'.csv',sep = ''), row.names = 1)
+    hydros <- read.csv(paste(result_path,'/hydros/hydros',toString(n), '_',toString(r),'.csv',sep = ''), row.names = 1)
     
     for (shift in as.list(shifts)){
       trueTrack <- shift_trueTrack(trueTrack, hydros, shift)

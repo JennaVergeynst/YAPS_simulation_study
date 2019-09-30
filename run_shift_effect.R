@@ -19,8 +19,8 @@ library(dplyr)
 
 source("wrapper_functions.R")
 
-pingType <- 'sbi'
-track_lengths <- c(500, 1000, 5000)
+pingType <- 'rbi'
+track_lengths <- c(500, 1000, 5000, 10000)
 mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
 shifts = c(0, 0.5, 1, 2)
 ## shift = nb of array-lengths the track is moved to the right
@@ -44,4 +44,13 @@ for (n in as.list(track_lengths)){
 cl = makeCluster(18)
 clusterExport(cl, list("readfiles", "readin_and_estim", "getInp", "runTmb"))
 clusterApplyLB(cl, combos_list, readin_and_estim, result_path, r, pingType)
-#readin_and_estim(combos_list[[1]], result_path, r, pingType)
+
+
+# # TEST
+# pars_df = data.frame(matrix(ncol = 3, nrow = 1))
+# colnames(pars_df) = c('track_length','mean_bi', 'shift')
+# pars_df$track_length = 10000
+# pars_df$mean_bi = 1.2
+# pars_df$shift = 0
+# r=1
+# readin_and_estim(pars_df, result_path, r, pingType)
