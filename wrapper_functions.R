@@ -153,7 +153,7 @@ chunk_toa <- function(toa_data, chunklen){
     chunks <- append(chunks, c(rep(chunk_counter,chunklen))) # changed i by chunk_couter
     chunk_counter <- chunk_counter+1
   }
-  if (len%%chunklen > 0.75*chunklen){ # take the last chunk separate only if it's 3/4 of chunklen
+  if (len-chunklen*(n-1) > 0.75*chunklen){ # take the last chunk separate only if it's 3/4 of chunklen
     chunks <- append(chunks, c(rep(chunk_counter,chunklen))) # changed n by chunk_couter
     chunk_counter <- chunk_counter+1
   }
