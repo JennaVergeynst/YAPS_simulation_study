@@ -8,14 +8,15 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory
 # setwd('/data/gent/vo/000/gvo00048/vsc41096/YAPS_simulation_study')
 
 PATH = getwd()
+devtools::install_github("baktoft/yaps")
 library(yaps)
 
 source("wrapper_functions.R")
 
 result_path = paste0(PATH, '/results/')
 # nb_repetitions <- 30#200 # nb of different simulated tracks for each setting
-repetitions <- 1:30 
-track_lengths <- c(500, 1000, 5000,10000)
+repetitions <- 1
+track_lengths <-c(5000)  #c(500, 1000, 5000,10000)
 pingType <- 'rbi'
 
 mean_bi = c(1.2, 5, 15, 25, 67.5, 90)
@@ -53,7 +54,12 @@ for (n in as.list(track_lengths)){
           }
 
           ## for pseudo-random burst interval
-          # ...
+          if (pingType == 'pbi'){
+            rbi_min <- min_bi[i]
+            rbi_max <- max_bi[i]
+            sbi_mean=NA
+            sbi_sd=NA
+          }
           
           sim_list <- simulation(trueTrack, hydros, pingType, sbi_mean=sbi_mean, sbi_sd=sbi_sd, rbi_min=rbi_min, rbi_max=rbi_max, pNA=0.3, pMP=0.03)
           toa_rev_df <- sim_list[[1]]
