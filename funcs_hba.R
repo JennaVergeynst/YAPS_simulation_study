@@ -182,12 +182,12 @@ getSimul <- function(sim_setup){
 
 # wrapper to get toa_list from parallel
 doGetToas <- function(sim_dt, tt_shifted_list, hydros_list, sbi_sd, pNA){
-	tictoc::tic()
+	#tictoc::tic()
 	cl = parallel::makeCluster(getOption("cl.cores", parallel::detectCores()))
 	parallel::clusterExport(cl, list("getToas", "tt_shifted_list", "sim_dt", "hydros_list", "sbi_sd", "pNA", "simulation", "simTelemetryTrack", "simToa"), envir = environment())
 	toa_list <- parallel::clusterApply(cl, x=1:nrow(sim_dt), fun=function(k) {getToas(k, sim_dt, tt_shifted_list, hydros_list, sbi_sd, pNA)})
 	parallel::stopCluster(cl)
-	tictoc::toc()
+	#tictoc::toc()
 	return(toa_list)
 }
 
