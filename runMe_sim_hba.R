@@ -1,16 +1,12 @@
 rm(list=ls())
 graphics.off()
 # # # Install relevant branch of YAPS from github - One time operation
-devtools::install_github("baktoft/yaps")
+# devtools::install_github("baktoft/yaps")
 
-# # Setup paths to your specific setup...
-# script_path <- '/home/hbak/H/ms/others/2019-04 JennaVergeynst - simulation study/git/YAPS_simulation_study'
-# data_path = "../../data" # this directory must exist and contain dir sim_out with subdirs sim_part_0, sim_part_1, sim_part_2, sim_part_3, sim_part_4
-# setwd(script_path)
-
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-script_path <- getwd()
-data_path = './data' # this directory must exist and contain dir sim_out with subdirs sim_part_0, sim_part_1, sim_part_2, sim_part_3, sim_part_4
+# Setup paths to your specific setup...
+script_path <- 'YAPS_simulation_study'
+data_path = "./data" # this directory must exist and contain dir sim_out with subdirs sim_part_0, sim_part_1, sim_part_2, sim_part_3, sim_part_4
+setwd(script_path)
 
 library(yaps)
 library(dplyr)
@@ -20,7 +16,6 @@ library(ggplot2)
 source("wrapper_functions.R")
 source('funcs_hba.R')
 #set.seed(42)
-# Need to have tictoc package installed
 
 #############################
 ### Simulate track specified in getSimSetup()
