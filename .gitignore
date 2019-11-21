@@ -1,21 +1,3 @@
-scratch/
-*.png
-results_long_tracks_with_chunks/
-.Rhistory
-*.csv
-
-.RData
-.ipynb_checkpoints/
-Check_results.ipynb
-chunksize_rerun_timelimit_fails.R
-test_args.R
-
-Paper_plots.ipynb
-extra_run.R
-extra_shift_sbi_run.R
-paper_plots.R
-run_tracklength_effect_rbi.R
-test_duration_10000.R
 
 data/*.rObj
 data/sim_out/sim_part_*/*.rObj
