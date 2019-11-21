@@ -1,7 +1,7 @@
 rm(list=ls())
 graphics.off()
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
-PATH = getwd()
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) # set file directory as working directory
+PATH = "../../data"
 library(yaps)
 #set.seed(42)
 
