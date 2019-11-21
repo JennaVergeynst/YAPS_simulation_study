@@ -4,7 +4,7 @@ graphics.off()
 # devtools::install_github("baktoft/yaps")
 
 # Setup paths to your specific setup...
-script_path <- 'YAPS_simulation_study'
+script_path <- '/Users/jennavergeynst/OneDrive - UGent/Sharing_code/YAPS_simulation_study'
 data_path = "./data" # this directory must exist and contain dir sim_out with subdirs sim_part_0, sim_part_1, sim_part_2, sim_part_3, sim_part_4
 setwd(script_path)
 
@@ -13,8 +13,7 @@ library(dplyr)
 library(plyr)
 library(data.table)
 library(ggplot2)
-source("wrapper_functions.R")
-source('funcs_hba.R')
+source('functions.R')
 #set.seed(42)
 
 #############################
