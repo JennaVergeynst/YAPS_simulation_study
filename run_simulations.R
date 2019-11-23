@@ -14,7 +14,7 @@ library(plyr)
 library(data.table)
 library(ggplot2)
 source('functions.R')
-#set.seed(42)
+#set.seed(42) # set the seed of R's random number generator, if you want to reproduce the same simulations
 
 #############################
 ### Simulate track specified in getSimSetup()
@@ -64,7 +64,7 @@ load(file=paste0(data_path, "/summ_part4.rObj"))
 vir_begin = 0
 vir_end = 0.8
 text_size = 16
-# Change htr values to the ones used in paper
+# Convert htr frequences in microseconds (only for summ_part4)
 summ_part4$htr <- lapply(summ_part4$htr, function(x) replace(x,x==1000, 1000))
 summ_part4$htr <- lapply(summ_part4$htr, function(x) replace(x,x==4800, 200))
 summ_part4$htr <- lapply(summ_part4$htr, function(x) replace(x,x==19200, 52))
