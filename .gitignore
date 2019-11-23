@@ -1,3 +1,4 @@
 
 data/*.rObj
 data/sim_out/sim_part_*/*.rObj
+.Rhistory
