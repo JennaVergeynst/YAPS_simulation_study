@@ -23,21 +23,6 @@ simHydros_adapted <- function(trueTrack){
   return(hydros)
 }
 
-simHydros <- function(auto=TRUE, trueTrack=NULL){
-  try(if(auto == TRUE & is.null(trueTrack)) stop("When auto is TRUE, trueTrack needs to be supplied"))
-  hx.min <- min(trueTrack$x) - 25
-  hx.max <- max(trueTrack$x) + 25
-  hy.min <- min(trueTrack$y) - 25
-  hy.max <- max(trueTrack$y) + 25
-  
-  hx <- c(hx.min,hx.min,hx.max,hx.max, 0, 500,  500, -500, -500)
-  hy <- c(hy.min,hy.max,hy.max,hy.min, 0, 500, -500, -500, 500)
-  
-  hydros <- data.frame(hx=hx, hy=hy)
-  
-  return(hydros)
-}
-
 shift_trueTrack <- function(trueTrack, hydros, shift){
   x_width <- max(hydros$hx)-min(hydros$hx)
   trueTrack_shifted <- trueTrack
