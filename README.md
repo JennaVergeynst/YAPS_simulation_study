@@ -1,4 +1,4 @@
-# YAPS SIMULATION STUDY
+# YAPS simulation study
 
 Simulation study to investigate the sensitivy of YAPS to following parameters: burst type, burst interval, number of observations, reflectivity of the environment, out-of-array positioning and temporal hydrophone resolution.
 
